@@ -3,7 +3,7 @@ dist: focal
 language: python
 
 python:
-  - 3.9
+  - 3.9.6
 
 install:
   - sudo apt -y install python3-distutils
