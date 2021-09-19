@@ -1,0 +1,3 @@
+pip install https://github.com/kivymd/KivyMD/archive/master.zip
+https://kivymd.readthedocs.io/en/latest/components/navigationdrawer/ копируем код: Switching screens in the ScreenManager and using the common MDToolbar
+вынес КВ="""...""" в файл Interior_menu.kv и заменил способ загрузки load_string(KV) --> load_file("Interior_menu.kv")
