@@ -11,3 +11,5 @@ for i in 'sssss':
 
 for a in range(3, 6):
     print(type(a), a)
+
+print(round(0.98 * 0.85, 2))  # округление до сотых
