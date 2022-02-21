@@ -11,11 +11,11 @@ while True:
         break
     elif "https://" in adr:
         s_('start ' + adr)
-        print("if")
+        print("elif_1")
     elif "www." in adr:
         adr = 'https://' + adr
         s_('start ' + adr)
-        print("efif")
+        print("efif_2")
     else:
         adr = 'https://www.' + adr
         s_('start ' + adr)
