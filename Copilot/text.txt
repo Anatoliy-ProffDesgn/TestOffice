@@ -1,0 +1,20 @@
+http://mercury.vetrf.ru/  
+62.76.148.81 (80/tcp, 443/tcp) 
+
+http://api.vetrf.ru/ 
+62.76.148.80 (80/tcp, 443/tcp) 
+
+https://mail.vetrf.ru/mail/ 
+62.76.145.39 (25/tcp, 80/tcp, 443/tcp) 
+
+https://mail.fsvps.gov.ru
+62.76.145.30 (25/tcp, 80/tcp, 110/tcp, 143/tcp, 443/tcp, 587/tcp, 993/tcp, 995/tcp) 
+
+https://ivis-sso.vetrf.ru 
+62.76.145.221 (80/tcp, 443/tcp) 
+
+http://assol-express.vetrf.ru 
+62.76.145.203 (80/tcp, 443/tcp, 8080/tcp) 
+
+https://argus.vetrf.ru 
+62.76.145.81 (80/tcp, 443/tcp) 
