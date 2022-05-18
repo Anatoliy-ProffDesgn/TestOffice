@@ -17,4 +17,35 @@ http://assol-express.vetrf.ru
 62.76.145.203 (80/tcp, 443/tcp, 8080/tcp) 
 
 https://argus.vetrf.ru 
-62.76.145.81 (80/tcp, 443/tcp) 
+62.76.145.81 (80/tcp, 443/tcp)
+
+https://vetrf.ru/
+https://www.vetrf.ru/
+https://idp.vetrf.ru/idp/profile/SAML2/POST/SSO?execution=e1s1
+https://vetrf.ru/vetrf-forum/forums/list.page
+https://duma.vetrf.ru/
+https://vesta.vetrf.ru/
+https://irena.vetrf.ru/irena/operatorui?_action=clearRequestsListMedicine
+https://assol.vetrf.ru
+https://galen.vetrf.ru/#/
+https://sirano.vetrf.ru/index
+https://atlas.vetrf.ru
+https://aplms.vetrf.ru/pub/
+https://accounts.vetrf.ru
+https://cerberus.vetrf.ru/cerberus/
+https://ecert.vetrf.ru
+https://help.vetrf.ru/wiki/
+62.76.145.83 (80/tcp, 443/tcp)
+
+https://t2-idp.vetrf.ru/idp/
+https://t2-aplms.vetrf.ru/pub/
+62.76.145.85 (80/tcp, 443/tcp)
+
+https://fsvps.gov.ru/fsvps
+62.76.145.84 (80/tcp, 443/tcp)
+
+ns.fsvps.ru
+62.76.145.10 (53/udp, 53/tcp, 80/tcp, 443/tcp)
+
+ns2.fsvps.ru
+62.76.145.9 (53/udp, 53/tcp, 80/tcp)
