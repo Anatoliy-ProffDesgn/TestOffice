@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'PyQT calc.ui'
+# Form implementation generated from reading ui file 'PyQT_calc.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.4
 #
@@ -12,7 +12,7 @@ from builtins import print
 # pip install pyqt5-tools # инсталюємо все необходимое для работы программы
 # команда для переходу в папку з файлом з кодом: cd C:\Users\Олександр\Desktop\Копіпаста\Копіпаста\Copilot
 # команда для перетворення файлу в код: 'pyuic5 FileName.ui -o FileName.py'
-    # pyuic5 PyQT calc.ui -o PyQT calc.py
+    # pyuic5 PyQT_calc.ui -o PyQT_calc.py
     # (але спершу необхідно перейти в папку з файлом з кодом)
 
 from PyQt5 import QtCore, QtGui, QtWidgets
