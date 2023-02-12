@@ -20,6 +20,12 @@ class Ui_mainWindow(object):
         mainWindow.setWindowIcon(icon)
         self.centralwidget = QtWidgets.QWidget(mainWindow)
         self.centralwidget.setObjectName("centralwidget")
+        self.tableWidget = QtWidgets.QTableWidget(self.centralwidget)
+        self.tableWidget.setGeometry(QtCore.QRect(130, 30, 491, 481))
+        self.tableWidget.setAcceptDrops(False)
+        self.tableWidget.setRowCount(3)
+        self.tableWidget.setColumnCount(3)
+        self.tableWidget.setObjectName("tableWidget")
         mainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(mainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 21))
@@ -41,5 +47,16 @@ class Ui_mainWindow(object):
     def retranslateUi(self, mainWindow):
         _translate = QtCore.QCoreApplication.translate
         mainWindow.setWindowTitle(_translate("mainWindow", "Прайс"))
+        self.tableWidget.setSortingEnabled(True)
         self.menu.setTitle(_translate("mainWindow", "Файл"))
         self.updtPrice_.setText(_translate("mainWindow", "Оновити прайс фурнітури"))
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    mainWindow = QtWidgets.QMainWindow()
+    ui = Ui_mainWindow()
+    ui.setupUi(mainWindow)
+    mainWindow.show()
+    sys.exit(app.exec_())

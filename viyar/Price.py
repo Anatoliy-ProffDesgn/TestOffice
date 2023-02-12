@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import QMessageBox as MsgBox
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMenuBar, QMenu, QFileDialog
 import mainWindow
 import sys
+import LoadPrice
 
 
 class mWnd(QtWidgets.QMainWindow, mainWindow.Ui_mainWindow):
@@ -36,6 +37,9 @@ class mWnd(QtWidgets.QMainWindow, mainWindow.Ui_mainWindow):
 
             self.statusbar.showMessage('Оновлення прайсу завершено!')
 
+def price_open():
+    Price=LoadPrice.Read_CSV_FilePrice()
+    print(Price)
 
 # відкрити вікно з прайсом
 def mainWindow_open():
@@ -45,6 +49,8 @@ def mainWindow_open():
     sys.exit(app.exec_())  # завершення програми
 
 
+
 if __name__ == "__main__":  # перевірка чи ми запускаємо головний файл або інклудимо його
+    price_open()
     mainWindow_open()  # відкриваємо вікно з прайсом
 # downlod_price.py

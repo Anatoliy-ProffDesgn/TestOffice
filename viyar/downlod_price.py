@@ -5,9 +5,12 @@ import json
 import os
 import sys
 from re import search
-
+import urllib.request
+import wget
+#
 url_ua = 'https://viyar.ua/excel_export/?id=2521&lang=ua'
 url_ru = 'https://viyar.ua/excel_export/?id=1981&lang=ru'
+#         https://viyar.ua/excel_export/?id=1981&lang=ru
 
 
 def downlod_price(url, path, name='', typeFile='csv'):
@@ -37,11 +40,8 @@ def downlod_price(url, path, name='', typeFile='csv'):
     with open(path + '/' + name, 'wb') as f:
         f.write(r.content)
 
-    # if os.path.exists(path): # перевірка чи існує папка з прайсом
-    #     os.remove(path) # якщо існує, то видаляємо файл
-    # r = requests.get(url)
-    # with open(path, 'wb') as f:
-    #     f.write(r.content)
 
+downlod_price('https://viyar.ua/store/Items/photos/ph69285.jpg', './temp/')
+#urllib.request.urlretrieve('https://viyar.ua/excel_export/?id=2521&to_xls=Y&lang=ua', 'prs.xls')
+wget.download('https://viyar.ua/store/Items/photos/ph69285.jpg', 'prs.jpg', bar =
 
-downlod_price('https://viyar.ua/store/Items/photos/ph69284.jpg', './temp/')
