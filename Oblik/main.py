@@ -1,7 +1,7 @@
 import FileDragAndDrop as fDr
 
 try:
-    rez=fDr.main()
+    rez = fDr.main()
 
     for r in rez:
         ''' self.name = os.path.basename(path)

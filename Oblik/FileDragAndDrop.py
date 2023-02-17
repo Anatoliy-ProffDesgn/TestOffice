@@ -3,7 +3,7 @@ import stat
 import time
 import wx
 from ObjectListView import ObjectListView, ColumnDefn
-
+#import ImageViewer as iv
 class MyFileDropTarget(wx.FileDropTarget):
     """"""
 
@@ -40,7 +40,6 @@ class MainPanel(wx.Panel):
         """Constructor"""
         wx.Panel.__init__(self, parent=parent)
         self.file_list = []
-
         file_drop_target = MyFileDropTarget(self)
         self.olv = ObjectListView(
             self, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
@@ -48,7 +47,7 @@ class MainPanel(wx.Panel):
         self.setFiles()
         # Позволяет редактировать ячейки таблицы после двойного клика по ним
         self.olv.cellEditMode = ObjectListView.CELLEDIT_SINGLECLICK
-
+        self.olv.SetEmptyListMsg("Перетягніть сюди файл або зображення")
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(self.olv, 1, wx.EXPAND)
         self.SetSizer(sizer)
@@ -89,6 +88,9 @@ class MainPanel(wx.Panel):
             ColumnDefn("Size", "left", 100, "size")
         ])
         self.olv.SetObjects(self.file_list)
+
+    def clickItm(self):
+        print(self.olv.SelectedItemCount)
 
 
 
