@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import QMessageBox as MsgBox
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMenuBar, QMenu, QFileDialog
 import mainWindow
 import sys
-import LoadPrice
+import LoadPrice_main
 
 
 class mWnd(QtWidgets.QMainWindow, mainWindow.Ui_mainWindow):
