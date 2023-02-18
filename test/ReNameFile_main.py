@@ -39,4 +39,6 @@ ent3 = Entry()
 ent3.grid(row=2, column=2)
 ent3.configure(width=70)
 
+# l3 = Label(text='Оберіть папку з файлами та інші параметри')
+# l3.grid(row=3, column=2)
 root.mainloop()
