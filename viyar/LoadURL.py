@@ -40,7 +40,7 @@ def FileUrl_Load(url, user_fileName=''):
     # индикатор выполнения отражает количество загруженных байт
     progress = tqdm(response.iter_content(buffer_size), f"Завантажується {filename}", total=file_size, unit="B",
                     unit_scale=True, unit_divisor=1024)
-    with open('./temp/' + filename, "wb") as f:
+    with open('./DownloadPrices/' + filename, "wb") as f:
         for data in progress.iterable:
             # запись данных прочитанных из файла
             f.write(data)
