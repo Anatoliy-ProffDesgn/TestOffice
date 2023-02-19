@@ -26,8 +26,8 @@ with open(f_name[0], 'r', encoding='utf-8') as f:
     j = 0
     for p in price:
         i += 1
-        search_str = 'пет'
-        if search_str in p['Name'] or search_str in p['Category']:
+        search_str = 'зав'
+        if (search_str.lower() in str(p['Name']).lower()) or (search_str.lower() in str(p['Category']).lower()):
             j += 1
             print(i, p)
     print('Знайдено', j)
