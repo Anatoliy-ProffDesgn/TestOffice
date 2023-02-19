@@ -3,7 +3,7 @@
 # import requests
 # from PyInstaller.isolated._parent import child
 from bs4 import BeautifulSoup
-from AllFile_inDir import get_file
+from AllFile_inDir import get_file as get_file_list
 
 f_name = './temp/newPrice1.html'
 
@@ -28,7 +28,7 @@ def price_pars(file_name, e_cod='utf-8'):
             if len(price_val) == 1:
                 price_val = [0, price_val[0]]
             else:
-                tmp[len(tmp) - 2] = float(price_val[0].replace(',', '.'))
+                tmp[len(tmp) - 2] = (price_val[0].replace(',', '.'))
             tmp[len(tmp) - 1] = price_val[1].replace('.', '') + '/' + tmp[len(tmp) - 1]
             d_rez = {'Article': tmp[0],
                      'Name': tmp[1],
@@ -41,7 +41,7 @@ def price_pars(file_name, e_cod='utf-8'):
 
 # -----------перебираєм всі файли прайсів у теці, збираєм повний прайс-------------
 def full_price(dir_name):
-    files_list = get_file(dir_name, 'price', 'html')
+    files_list = get_file_list(dir_name, 'price', 'html')
     price = []
     for file in files_list:
         tmp_price = price_pars(file)
@@ -51,15 +51,15 @@ def full_price(dir_name):
 
 
 # ------------Тест-----------------
-# rez1 = price_pars(f_name)
-# print(rez1)
-#
-# for lst in rez1:
-#     print(lst)
-# print(str(len(rez1)), '- строк(а)')
-i = 0
-price = full_price('./DownloadPrices/')
-for pr in price:
-    i += 1
-    print(i, pr)
-print(str(len(price)), '- строк(а)')
+# # rez1 = price_pars(f_name)
+# # print(rez1)
+# #
+# # for lst in rez1:
+# #     print(lst)
+# # print(str(len(rez1)), '- строк(а)')
+# i = 0
+# price1 = full_price('./DownloadPrices/')
+# for pr in price1:
+#     i += 1
+#     print(i, pr)
+# print(str(len(price1)), '- строк(а)')
