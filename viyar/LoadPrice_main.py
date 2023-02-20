@@ -1,10 +1,9 @@
 from LoadURL import FileUrl_Load as load_file_in_url
-from URL_list import url_list as urls
 
 
 # ------------загрузка файлов із сайту---------------------
 # адреси для загрузкі прайсів беремо з URL_list
-def download_price():
+def download_price(urls):
     i = int(0)
     for url in urls:
         i += 1
