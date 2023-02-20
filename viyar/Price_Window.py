@@ -14,10 +14,32 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(936, 875)
+        Form.resize(936, 900)
         self.treeView = QtWidgets.QTreeView(Form)
-        self.treeView.setGeometry(QtCore.QRect(10, 90, 921, 781))
+        self.treeView.setGeometry(QtCore.QRect(10, 50, 921, 821))
         self.treeView.setObjectName("treeView")
+        self.label = QtWidgets.QLabel(Form)
+        self.label.setGeometry(QtCore.QRect(10, 870, 341, 16))
+        self.label.setObjectName("label")
+        self.gridLayoutWidget = QtWidgets.QWidget(Form)
+        self.gridLayoutWidget.setGeometry(QtCore.QRect(10, 0, 921, 41))
+        self.gridLayoutWidget.setObjectName("gridLayoutWidget")
+        self.gridLayout = QtWidgets.QGridLayout(self.gridLayoutWidget)
+        self.gridLayout.setContentsMargins(0, 0, 0, 0)
+        self.gridLayout.setSpacing(2)
+        self.gridLayout.setObjectName("gridLayout")
+        self.lineEdit = QtWidgets.QLineEdit(self.gridLayoutWidget)
+        self.lineEdit.setObjectName("lineEdit")
+        self.gridLayout.addWidget(self.lineEdit, 1, 0, 1, 1)
+        self.label_3 = QtWidgets.QLabel(self.gridLayoutWidget)
+        self.label_3.setObjectName("label_3")
+        self.gridLayout.addWidget(self.label_3, 0, 0, 1, 1)
+        self.label_2 = QtWidgets.QLabel(self.gridLayoutWidget)
+        self.label_2.setObjectName("label_2")
+        self.gridLayout.addWidget(self.label_2, 0, 1, 1, 1)
+        self.lineEdit_2 = QtWidgets.QLineEdit(self.gridLayoutWidget)
+        self.lineEdit_2.setObjectName("lineEdit_2")
+        self.gridLayout.addWidget(self.lineEdit_2, 1, 1, 1, 1)
 
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
@@ -25,6 +47,9 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
+        self.label.setText(_translate("Form", "кількість знайдених результатів"))
+        self.label_3.setText(_translate("Form", "Пошук у назвах виробу"))
+        self.label_2.setText(_translate("Form", "Пошук у категоріях товарів"))
 
 
 if __name__ == "__main__":

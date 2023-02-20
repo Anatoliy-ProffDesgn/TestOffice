@@ -30,4 +30,4 @@ def load_update(load_in_url=True, update_in_file=True, file_name=''):
 
 # print(prise_file_name)
 
-load_update(False, True)
+# load_update(False, True)
