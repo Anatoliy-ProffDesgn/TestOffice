@@ -26,9 +26,8 @@ def price_pars(file_name, e_cod='utf-8'):
             tmp.pop(), tmp.pop(0)  # Видаляємо порожні (першу і останню) ел. списку
             price_val = tmp[len(tmp) - 2].split()  # Формуєм з '125,1 грн.' --> '125.2', 'грн/шт'
             if len(price_val) == 1:
-                price_val = [0, price_val[0]]
-            else:
-                tmp[len(tmp) - 2] = (price_val[0].replace(',', '.'))
+                price_val = ['0', price_val[0]]
+            tmp[len(tmp) - 2] = (price_val[0].replace(',', '.'))
             tmp[len(tmp) - 1] = price_val[1].replace('.', '') + '/' + tmp[len(tmp) - 1]
             d_rez = {'Article': tmp[0],
                      'Name': tmp[1],
