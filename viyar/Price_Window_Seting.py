@@ -12,6 +12,19 @@ class CustomSortModel(QtCore.QSortFilterProxyModel):
         else:
             return super().lessThan(left, right)
 
+
+tmp = []
+data = open_price()
+
+
+# -----------------функція пошуку по назві------------------------
+def on_text_changed(txt):
+    for item in data:
+        if txt in item['Name']:
+            tmp.append(item)
+    return tmp
+
+
 if __name__ == "__main__":
     import sys
 
@@ -20,12 +33,12 @@ if __name__ == "__main__":
     ui = Pw.Ui_Form()
     ui.setupUi(Form)
 
-# -----------Створюємо модель даних і встановлюємо її в treeView---------
+    # -----------Створюємо модель даних і встановлюємо її в treeView---------
     ui.model = QtGui.QStandardItemModel()
     ui.treeView.setModel(ui.model)
     ui.treeView.setAlternatingRowColors(True)  # чергування кольру рядків
 
-# -----------Встановлюємо заголовки стовпців-----------------------------
+    # -----------Встановлюємо заголовки стовпців-----------------------------
     ui.model.setHorizontalHeaderLabels(['Артикул', 'Назва виробу', 'Ціна', 'Одиниці', 'Категорія'])
     header = ui.treeView.header()
     header.resizeSection(0, 80)
@@ -33,16 +46,16 @@ if __name__ == "__main__":
     header.resizeSection(2, 60)
     header.resizeSection(3, 60)
 
-# -----------вмикаємо підтримку сортування----------------------------------
+    # -----------вмикаємо підтримку сортування----------------------------------
     ui.sortModel = CustomSortModel()
     ui.sortModel.setSourceModel(ui.model)
     ui.treeView.setModel(ui.sortModel)
     ui.treeView.setSortingEnabled(True)
 
-# -----------встановлюємо індекс колонки, по якій будуть сортуватися дані---
+    # -----------встановлюємо індекс колонки, по якій будуть сортуватися дані---
     # ui.treeView.setSortingColumn(0)
 
-# -----------встановлюємо іконку для заголовка колонки----------------------
+    # -----------встановлюємо іконку для заголовка колонки----------------------
     header = ui.treeView.header()
     header.setSortIndicator(0, QtCore.Qt.AscendingOrder)
     header.setSortIndicator(1, QtCore.Qt.AscendingOrder)
@@ -50,8 +63,8 @@ if __name__ == "__main__":
     header.setSortIndicator(3, QtCore.Qt.AscendingOrder)
     header.setSortIndicator(4, QtCore.Qt.AscendingOrder)
 
-# -----------Заповнюємо модель даних елементами з масиву--------------------
-    data = open_price()
+
+    # -----------Заповнюємо модель даних елементами з масиву--------------------
     def setData(data_rez):
         for item in data_rez:
             root = ui.model.invisibleRootItem()
@@ -60,20 +73,23 @@ if __name__ == "__main__":
                             QtGui.QStandardItem(item['Price']),
                             QtGui.QStandardItem(item['Unit']),
                             QtGui.QStandardItem(item['Category'])])
-            par = root.child(root.rowCount() - 1)
+            # par = root.child(root.rowCount() - 1)
             # print(root.rowCount(), par)
 
 
-
-
-    # print(ui.treeView.model().rowCount())
     setData(data)
     ui.retranslateUi(Form)
     QtCore.QMetaObject.connectSlotsByName(Form)
-    r = 'Кількість знайдених результатів: ' + str(len(data))
-    ui.label.setText(r)  #'Кількість знайдених результатів' + len(data)
 
+    r = str(ui.treeView.model().rowCount())
+    ui.label.setText('Кількість знайдених результатів: ' + r)
 
+    # -----------------пошук по назві------------------------
+    srch = ui.lineEdit_SearchName
+    ui.my_line_edit = QLineEdit()
+    # srch.textChanged.connect(on_text_changed(srch.text()))
+    srch.textChanged.connect(on_text_changed(srch.text()))
+    srch.textChanged.connect()
     def retranslateUi(Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
