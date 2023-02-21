@@ -1,6 +1,7 @@
 import Price_Window as Pw
 from PyQt5 import QtCore, QtGui, QtWidgets
 from Open_Price import open_price
+from Search_txt_in_price import find_txt_in_price
 
 
 class CustomSortModel(QtCore.QSortFilterProxyModel):
@@ -15,15 +16,6 @@ class CustomSortModel(QtCore.QSortFilterProxyModel):
 
 tmp = []
 data = open_price()
-
-
-# -----------------функція пошуку по назві------------------------
-def on_text_changed(txt):
-    for item in data:
-        if txt in item['Name']:
-            tmp.append(item)
-    return tmp
-
 
 if __name__ == "__main__":
     import sys
@@ -66,6 +58,7 @@ if __name__ == "__main__":
 
     # -----------Заповнюємо модель даних елементами з масиву--------------------
     def setData(data_rez):
+        ui.model.invisibleRootItem().clearData()
         for item in data_rez:
             root = ui.model.invisibleRootItem()
             root.appendRow([QtGui.QStandardItem(item['Article']),
@@ -75,21 +68,48 @@ if __name__ == "__main__":
                             QtGui.QStandardItem(item['Category'])])
             # par = root.child(root.rowCount() - 1)
             # print(root.rowCount(), par)
+        ui.treeView.setModel(ui.model) #/????????-----------------------------?????????
+        ui.retranslateUi(Form)
+        QtCore.QMetaObject.connectSlotsByName(Form)
 
 
     setData(data)
-    ui.retranslateUi(Form)
-    QtCore.QMetaObject.connectSlotsByName(Form)
 
-    r = str(ui.treeView.model().rowCount())
-    ui.label.setText('Кількість знайдених результатів: ' + r)
+    # r = str(ui.treeView.model().rowCount())
+    # ui.label.setText('Кількість знайдених результатів: ' + r)
 
     # -----------------пошук по назві------------------------
     srch = ui.lineEdit_SearchName
-    ui.my_line_edit = QLineEdit()
-    # srch.textChanged.connect(on_text_changed(srch.text()))
-    srch.textChanged.connect(on_text_changed(srch.text()))
-    srch.textChanged.connect()
+
+
+    # -----------------функція пошуку по назві------------------------
+    def on_text_changed():
+        txt = srch.text()
+        rez_list = find_txt_in_price(txt, data, 'Name')
+        # for item in data:
+        #     if txt in item['Name']:
+        #         tmp.append(item)
+        # setData(tmp)
+        if type(rez_list) == 'list':
+            setData(rez_list)
+
+
+    srch.textChanged.connect(on_text_changed)
+
+
+    # def on_rows_inserted(self, parent, start, end):
+    #     # Отримуємо кількість рядків
+    #     row_count = self.model.rowCount()
+    #
+    #     # Оновлюємо текст у QLabel
+    #     # self.row_count_label.setText(f"Rows count: {row_count}")
+    #     ui.label.setText(f"Кількість знайдених результатів: {row_count}")
+    #
+    #
+    # # Підключаємо сигнал rowsInserted до слоту, що реагує на зміну кількості рядків
+    # ui.model.rowsInserted.connect(on_rows_inserted)
+
+
     def retranslateUi(Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
