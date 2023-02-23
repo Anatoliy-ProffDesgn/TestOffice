@@ -2,6 +2,7 @@ import Price_Window as Pw
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt, QSortFilterProxyModel
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
+from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QTreeView, QLineEdit
 from Open_Price import open_price
 from Search_txt_in_price import find_txt_in_price
@@ -24,7 +25,6 @@ if __name__ == "__main__":
     Form = QtWidgets.QWidget()
     ui = Pw.Ui_Form()
     ui.setupUi(Form)
-
     # -----------Створюємо модель даних і встановлюємо її в treeView-------------------------------------------
     ui.model = QtGui.QStandardItemModel()
     ui.treeView.setModel(ui.model)
@@ -80,11 +80,16 @@ if __name__ == "__main__":
 
     # -----------------функція пошуку по назві-----------------------------------------------------
     def find_in():
+        txt = ui.lineEdit_SearchArt.text()
+        if len(txt) > 0:
+            data_0 = find_txt_in_price(txt, data, 'Article')
+        else:
+            data_0 = data
         txt = ui.lineEdit_SearchName.text()
         if len(txt) > 0:
-            data_1 = find_txt_in_price(txt, data, 'Name')
+            data_1 = find_txt_in_price(txt, data_0, 'Name')
         else:
-            data_1 = data
+            data_1 = data_0
         txt = ui.lineEdit_SearchCategori.text()
         if len(txt) > 0:
             data_2 = find_txt_in_price(txt, data_1, 'Category')
@@ -110,7 +115,17 @@ if __name__ == "__main__":
 
     # -----------------Метод для обробки clicked на елементі treeView-----------------------------------
     def treeView_clicked(index):
-        print(f"Клікнуто на елементі: рядок - {index.row()}, колонка - {index.column()}")
+        my_model = index.model()
+        row = index.row()
+        column_count = my_model.columnCount()
+        row_data = []
+        for column in range(column_count):
+            item = my_model.index(row, column)
+            row_data.append(item.data())
+
+        # З'єднуємо дані з кожної колонки у рядок
+        # row_string = ' '.join(row_data)
+        print(row_data)
 
 
     # ----------------Метод для обробки подвійного doubleClicked на елементі treeView-----------------
@@ -121,7 +136,7 @@ if __name__ == "__main__":
     # ----------------Метод для обробки подвійного Clicked на елементі treeView.Header-----------------
     def handleHeaderClick(index):
         print(f'Header clicked: column {index}')
-        me_sort_mod(ui.model)
+        me_sort_mod(ui.treeView.model())
 
 
     # ----------------Метод для обробки подвійного doubleClicked на елементі treeView.Header-----------------
@@ -130,7 +145,9 @@ if __name__ == "__main__":
 
 
     tmp = []
-    data = open_price()
+    file_tmp = open_price()
+    data = file_tmp[0]
+
     len_dada = len(data)
     setData(data)
     r = str(ui.treeView.model().rowCount())
@@ -140,6 +157,7 @@ if __name__ == "__main__":
     # --------------------Підключення сигналів-------------------------------------------------------------
     ui.lineEdit_SearchName.textChanged.connect(find_in)
     ui.lineEdit_SearchCategori.textChanged.connect(find_in)
+    ui.lineEdit_SearchArt.textChanged.connect(find_in)
     ui.treeView.clicked.connect(treeView_clicked)
     ui.treeView.doubleClicked.connect(treeView_doubleClicked)
     header.sectionClicked.connect(handleHeaderClick)

@@ -36,37 +36,65 @@
     <string>кількість знайдених результатів</string>
    </property>
   </widget>
-  <widget class="QWidget" name="gridLayoutWidget">
+  <widget class="QWidget" name="gridLayoutWidget_2">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>0</y>
+     <y>-1</y>
      <width>921</width>
-     <height>41</height>
+     <height>51</height>
     </rect>
    </property>
-   <layout class="QGridLayout" name="gridLayout">
-    <property name="spacing">
+   <layout class="QGridLayout" name="gridLayout_2" columnstretch="1,4,2">
+    <property name="topMargin">
+     <number>3</number>
+    </property>
+    <property name="bottomMargin">
+     <number>3</number>
+    </property>
+    <property name="horizontalSpacing">
+     <number>10</number>
+    </property>
+    <property name="verticalSpacing">
      <number>2</number>
     </property>
     <item row="1" column="0">
-     <widget class="QLineEdit" name="lineEdit_SearchName"/>
-    </item>
-    <item row="0" column="0">
-     <widget class="QLabel" name="label_3">
-      <property name="text">
-       <string>Пошук у назвах виробу</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="1">
-     <widget class="QLabel" name="label_2">
-      <property name="text">
-       <string>Пошук у категоріях товарів</string>
-      </property>
-     </widget>
+     <widget class="QLineEdit" name="lineEdit_SearchArt"/>
     </item>
     <item row="1" column="1">
+     <widget class="QLineEdit" name="lineEdit_SearchName"/>
+    </item>
+    <item row="0" column="1">
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>Пошук за назвою</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QLabel" name="label_4">
+      <property name="text">
+       <string>Пошук за артикулом</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="2">
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>Пошук за категорією</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="2">
      <widget class="QLineEdit" name="lineEdit_SearchCategori"/>
     </item>
    </layout>

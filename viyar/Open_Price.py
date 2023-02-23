@@ -11,7 +11,7 @@ def open_price(file_name=''):
         file_name = [file_name]
     with open(file_name[0], 'r', encoding='utf-8') as f:
         price = js.load(f)
-    return price
+    return [price, file_name]
 
 # ---------------test------------------
 # i = 0
