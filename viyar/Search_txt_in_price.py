@@ -1,11 +1,15 @@
+
+
 def find_txt_in_price(txt, list_price, key):
     tmp = []
-    if len(txt) > 2:
-        for item in list_price:
-            if txt in item[key]:
-                print(txt)
-                tmp.append(item)
-    else:
-        tmp = False
-    print(type(tmp))
+    l_txt = txt.split(' ')
+    for item in list_price:
+        search_str = str(item[key]).lower()
+        inf = True
+        for item_txt in l_txt:
+            if not str(item_txt).lower() in search_str:
+                inf = False
+                break
+        if inf:
+            tmp.append(item)
     return tmp
