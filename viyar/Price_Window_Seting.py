@@ -83,12 +83,10 @@ if __name__ == "__main__":
         txt = ui.lineEdit_SearchName.text()
         if len(txt) > 0:
             data_2 = find_txt_in_price(txt, data, 'Name')
-        elif len(txt) == 0:
-            data_2 = data
         else:
-            data_2 = False
-        print(len(data_2))
-        if not len(data_2) == len_dada:
+            data_2 = data
+
+        if len(data_2) != len_dada or len(txt) != 0:
             ui.model2 = QStandardItemModel()
             interior(ui.model2)
             for item in data_2:
@@ -103,7 +101,6 @@ if __name__ == "__main__":
             ui.label.setText(f"Кількість знайдених результатів: {row_count}")
             # відобразити модель
             ui.treeView.show()
-            # me_sort_mod(ui.model2)
 
 
     # -----------------Метод для обробки clicked на елементі treeView-----------------------------------
