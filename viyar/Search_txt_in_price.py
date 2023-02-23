@@ -8,10 +8,22 @@ def find_txt_in_price(txt, list_price, key):
         search_str = str(item[key]).lower()
         inf = True
         for item_txt in l_txt:
-            if not str(item_txt).lower() in search_str:
+            t = item_txt.split('/')
+            inf1 = False
+            for str_t in t:
+                if str_t in search_str:
+                    inf1 = True
+                    # break
+            if inf1:
+                inf = True
+                # break
+            else:
                 inf = False
                 break
-        if inf:
+            # if not str(item_txt).lower() in search_str:
+            #     inf = False
+            #     break
+        if  inf:
             tmp.append(item)
 
     l_txt = find_del_list(txt)
@@ -38,7 +50,7 @@ def find_del_list(txt):
             if item[0] == '-':
                 tmp.append(item[1:])
     for item in tmp:
-        if len(item) < 3:
+        if len(item) < 2:
             tmp.remove(item)
     return tmp
 
@@ -51,7 +63,7 @@ def find_list(txt):
             if not item[0] == '-':
                 tmp.append(item)
     for item in tmp:
-        if len(item) < 3:
+        if len(item) < 2:
             tmp.remove(item)
     return tmp
 

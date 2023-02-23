@@ -82,9 +82,14 @@ if __name__ == "__main__":
     def find_in():
         txt = ui.lineEdit_SearchName.text()
         if len(txt) > 0:
-            data_2 = find_txt_in_price(txt, data, 'Name')
+            data_1 = find_txt_in_price(txt, data, 'Name')
         else:
-            data_2 = data
+            data_1 = data
+        txt = ui.lineEdit_SearchCategori.text()
+        if len(txt) > 0:
+            data_2 = find_txt_in_price(txt, data_1, 'Category')
+        else:
+            data_2 = data_1
 
         if len(data_2) != len_dada or len(txt) != 0:
             ui.model2 = QStandardItemModel()
@@ -134,6 +139,7 @@ if __name__ == "__main__":
 
     # --------------------Підключення сигналів-------------------------------------------------------------
     ui.lineEdit_SearchName.textChanged.connect(find_in)
+    ui.lineEdit_SearchCategori.textChanged.connect(find_in)
     ui.treeView.clicked.connect(treeView_clicked)
     ui.treeView.doubleClicked.connect(treeView_doubleClicked)
     header.sectionClicked.connect(handleHeaderClick)
