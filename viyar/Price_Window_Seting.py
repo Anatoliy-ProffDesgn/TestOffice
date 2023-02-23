@@ -87,21 +87,23 @@ if __name__ == "__main__":
             data_2 = data
         else:
             data_2 = False
-        ui.model2 = QStandardItemModel()
-        interior(ui.model2)
-        for item in data_2:
-            ui.model2.appendRow([QtGui.QStandardItem(item['Article']),
-                                 QtGui.QStandardItem(item['Name']),
-                                 QtGui.QStandardItem(item['Price']),
-                                 QtGui.QStandardItem(item['Unit']),
-                                 QtGui.QStandardItem(item['Category'])])
-        # встановити нову модель у treeView
-        ui.treeView.setModel(ui.model2)
-        row_count = ui.model2.rowCount()
-        ui.label.setText(f"Кількість знайдених результатів: {row_count}")
-        # відобразити модель
-        ui.treeView.show()
-        # me_sort_mod(ui.model2)
+        print(len(data_2))
+        if not len(data_2) == len_dada:
+            ui.model2 = QStandardItemModel()
+            interior(ui.model2)
+            for item in data_2:
+                ui.model2.appendRow([QtGui.QStandardItem(item['Article']),
+                                     QtGui.QStandardItem(item['Name']),
+                                     QtGui.QStandardItem(item['Price']),
+                                     QtGui.QStandardItem(item['Unit']),
+                                     QtGui.QStandardItem(item['Category'])])
+            # встановити нову модель у treeView
+            ui.treeView.setModel(ui.model2)
+            row_count = ui.model2.rowCount()
+            ui.label.setText(f"Кількість знайдених результатів: {row_count}")
+            # відобразити модель
+            ui.treeView.show()
+            # me_sort_mod(ui.model2)
 
 
     # -----------------Метод для обробки clicked на елементі treeView-----------------------------------
@@ -127,6 +129,7 @@ if __name__ == "__main__":
 
     tmp = []
     data = open_price()
+    len_dada = len(data)
     setData(data)
     r = str(ui.treeView.model().rowCount())
     ui.label.setText('Кількість знайдених результатів: ' + r)
