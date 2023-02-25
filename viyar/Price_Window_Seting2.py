@@ -1,12 +1,21 @@
-from Price_Window import *  # as Pw
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtGui import QStandardItemModel
+from Price_Window import *
 from Open_Price import open_price
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtGui import QStandardItemModel, QPixmap
 from Search_txt_in_price import find_txt_in_price
 import requests
-from PyQt5.QtGui import QPixmap
 import sys
-import Show_ImageViwer as shw_img
+import random
+
+ua = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:54.0) Gecko/20100101 Firefox/54.0",
+    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36",
+]
+user_agent = random.choice(ua)
+print(user_agent)
+global pixmap_all
 
 
 class CustomSortModel(QtCore.QSortFilterProxyModel):
@@ -17,7 +26,6 @@ class CustomSortModel(QtCore.QSortFilterProxyModel):
             return left_data < right_data
         else:
             return super().lessThan(left, right)
-
 
 
 app = QtWidgets.QApplication(sys.argv)
@@ -116,14 +124,7 @@ def find_in():
 def treeView_clicked(index):
     my_model = index.model()
     row = index.row()
-    column_count = my_model.columnCount()
-    row_data = []
-    # for column in range(column_count):
-    #     item = my_model.index(row, column)
-    #     row_data.append(item.data())
-    print(row_data)
     art = my_model.index(row, 0).data()  # отримуємо артикул
-    print(art)
     update_image(art)
 
 
@@ -133,8 +134,6 @@ def treeView_doubleClicked(index):
     row = index.row()
     art = my_model.index(row, 0).data()  # отримуємо артикул
     print(art)
-
-
 
 
 # ----------------Метод для обробки подвійного Clicked на елементі treeView.Header-----------------
@@ -156,9 +155,8 @@ url_s = ['https://viyar.ua/store/Items/photos/ph', '.jpg']
 global me_art
 
 
-
 def load_image(url):
-    response = requests.get(url)
+    response = requests.get(url, headers={'User-Agent': random.choice(ua)})
     pixmap = QPixmap()
     pixmap.loadFromData(response.content)
     return pixmap
@@ -181,14 +179,19 @@ def next_image(old_url, art):
 
 def slider_change():
     pixmap = next_image(url_s, me_art)
+    # print(type(pixmap_all(ui.horizontalScrollBar.value())))
+    # get_image(ui.label_img, pixmap_all[ui.horizontalScrollBar.value()])
     get_image(ui.label_img, pixmap)
 
 
 def count_image(art):
     pixmap = load_first_image(art)
     index = 0
+    # global pixmap_all
+    pixmap_all = []
     # print(pixmap.isNull())
     while not pixmap.isNull():
+        # pixmap_all.append(pixmap)
         index += 1
         n = str('_' + str(index + 1))
         next_url = url_s[0] + art + n + url_s[1]
@@ -223,6 +226,8 @@ def update_image(art):
     ui.label_art.setText(me_art)
     get_image(ui.label_img, load_first_image(me_art))
     ui.horizontalScrollBar.setMaximum(count_image(me_art))
+
+
 # ----------------------------------------------------------------------------------------------------------
 # ---------------END ЗОБРАЖЕННЯ---------------------------------------------------------------------------------
 
