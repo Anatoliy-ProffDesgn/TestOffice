@@ -1,12 +1,9 @@
 import Price_Window as Pw
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import Qt, QSortFilterProxyModel
-from PyQt5.QtGui import QStandardItemModel, QStandardItem
-from PyQt5.QtWidgets import QMainWindow
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QTreeView, QLineEdit
+from PyQt5.QtGui import QStandardItemModel
 from Open_Price import open_price
 from Search_txt_in_price import find_txt_in_price
-
+import Show_ImageViwer as shw_img
 
 class CustomSortModel(QtCore.QSortFilterProxyModel):
     def lessThan(self, left, right):
@@ -47,7 +44,7 @@ if __name__ == "__main__":
         me_model.setHorizontalHeaderLabels(['Артикул', 'Назва виробу', 'Ціна', 'Одиниці', 'Категорія'])
         header = ui.treeView.header()
         header.resizeSection(0, 80)
-        header.resizeSection(1, 550)
+        header.resizeSection(1, 400)
         header.resizeSection(2, 60)
         header.resizeSection(3, 60)
 
@@ -128,9 +125,45 @@ if __name__ == "__main__":
         print(row_data)
 
 
+    # def open_image_viewer(art):
+    #     # image_data = requests.get(image_url).content
+    #     # pixmap = QPixmap()
+    #     # pixmap.loadFromData(image_data)
+    #     ui = shw_img.img_v.Ui_Form()
+    #     ui.setupUi(ui)
+    #     ui.lineEdit_art.setText(art)
+    #     # ui.pushButton.clicked.connect(ui.close)
+    #     ui.show()
+
     # ----------------Метод для обробки подвійного doubleClicked на елементі treeView-----------------
     def treeView_doubleClicked(index):
-        print(f"Подвійний клік на елементі: рядок - {index.row()}, колонка - {index.column()}")
+        my_model = index.model()
+        row = index.row()
+        art = my_model.index(row, 0).data()  # отримуємо артикул
+        print(art)
+
+        app_img = QtWidgets.QApplication(sys.argv)
+        ui.img_window = QtWidgets.QWidget()
+        ui.img_window = shw_img.img_v.Ui_Form()
+        ui.img_window.lineEdit_art.setText(art)  # передаємо артикул у вікно
+        app_img.exec_()
+
+        # if __name__ == '__main__':
+        #     shw_img
+        # if __name__ == "__main__":  # формуємо вікно з завантаженим зображенням
+        #     import sys
+        #     # app_img = QtWidgets.QApplication(sys.argv)
+        #     app_img = QtWidgets.QApplication.instance()  # отримуємо посилання на запущений застосунок
+        #     ui.img_window.setupUi(ui.img_window)
+        #     ui.img_window.show()  # відкриває вікно з завантаженим зображенням
+        #     app_img.exec_()  # запускаємо головний цикл застосунку
+        #     sys.exit(app_img.exec_())  # закриваємо застосунок після закриття вікна зображення
+        # Form_img = QtWidgets.QWidget()
+        # ui = shw_img.img_v.Ui_Form()
+        # ui.setupUi(Form_img)
+        # ui.lineEdit_art.setText(art)  # передаємо артикул у вікно
+        # Form_img.show()  # відкриває вікно з завантаженим зображенням
+        # open_image_viewer(art)
 
 
     # ----------------Метод для обробки подвійного Clicked на елементі treeView.Header-----------------
@@ -147,11 +180,16 @@ if __name__ == "__main__":
     tmp = []
     file_tmp = open_price()
     data = file_tmp[0]
-
     len_dada = len(data)
+
     setData(data)
+
     r = str(ui.treeView.model().rowCount())
+    nm_prise = str(file_tmp[1]).split('.')[-2].split('/')[-1]
+
+    ui.label_PriceDataName.setText(nm_prise)
     ui.label.setText('Кількість знайдених результатів: ' + r)
+
     header = ui.treeView.header()
 
     # --------------------Підключення сигналів-------------------------------------------------------------
@@ -169,5 +207,7 @@ if __name__ == "__main__":
         Form.setWindowTitle(_translate("Form", "Form"))
 
 
+
+    # ui.img_window = shw_img.img_v.Ui_Form()
     Form.show()
     sys.exit(app.exec_())
