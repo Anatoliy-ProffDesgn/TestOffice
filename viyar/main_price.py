@@ -2,15 +2,29 @@ import random
 import sys
 
 import requests
-from PyQt5.QtCore import QUrl
+from PyQt5.QtCore import QUrl, Qt
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtGui import QStandardItemModel, QDesktopServices
+from PyQt5.QtWidgets import QInputDialog, QTreeView
 
 import img_viwer
 from Open_Price import open_price
 from Price_Window import *
 from Search_txt_in_price import find_txt_in_price
 from main_Full_Updete_Price import *
+
+
+# class MyTreeView(QTreeView):
+#     def __init__(self):
+#         super().__init__()
+#
+#     def keyPressEvent(self, event):
+#         if event.type() == event.KeyPress:
+#             print(f"Натиснута клавіша {event.key()} ({Qt.Key(event.key())})")
+#         super().keyPressEvent(event)
+
+
+
 
 
 class MyForm(QtWidgets.QWidget):
@@ -22,10 +36,11 @@ class MyForm(QtWidgets.QWidget):
         self.ui.label_img.mouseDoubleClickEvent = self.viwe_img
 
     indx = 0
+
     def viwe_img(self, pixmap_all, index):
         index = 0 if index > len(pixmap_all) else index
         global indx
-        indx=index
+        indx = index
         pixmap = QPixmap(pixmap_all[index])  # ui.horizontalScrollBar.value()
         img_viwer.Form_viwer = QtWidgets.QWidget()
         ui_viwer = img_viwer.Ui_Form_viwer()
@@ -34,19 +49,6 @@ class MyForm(QtWidgets.QWidget):
         img_viwer.Form_viwer.show()
         app.exec_()
 
-    # def next_image(self):
-    #     self.indx += 1
-    #     pixmap = QPixmap(pixmap_all[self.indx])
-    #     self.ui_viwer.label.setPixmap(pixmap)
-    #
-    # def prev_image(self):
-    #     self.indx -= 1
-    #     pixmap = QPixmap(pixmap_all[self.indx])
-    #     self.ui_viwer.label.setPixmap(pixmap)
-    #
-    # # ui_viwer = img_viwer.Ui_Form_viwer()
-    # self.ui_viwer.pushButton_up.clicked.connect(next_image())
-    # self.ui_viwer.pushButton_down.clicked.connect(prev_image)
 
 ua = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
@@ -63,10 +65,6 @@ global me_art
 global data
 url_s = ['https://viyar.ua/store/Items/photos/ph', '.jpg']
 
-
-# class viwe_img(ui_viwe):
-#     def __init__(self):
-#         super().__init__()
 
 class CustomSortModel(QtCore.QSortFilterProxyModel):
     def lessThan(self, left, right):
@@ -87,10 +85,11 @@ ui = Ui_Form()
 ui.setupUi(Form)
 # -----------Створюємо модель даних і встановлюємо її в treeView-------------------------------------------
 ui.model = QtGui.QStandardItemModel()
-ui.model_null = QtGui.QStandardItemModel()
 ui.treeView.setModel(ui.model)
-ui.treeView_2.setModel(ui.model_null)
 ui.treeView.setAlternatingRowColors(True)  # чергування кольру рядків
+
+ui.model_null = QtGui.QStandardItemModel()
+ui.treeView_2.setModel(ui.model_null)
 ui.treeView_2.setAlternatingRowColors(True)  # чергування кольру рядків
 
 
@@ -101,9 +100,6 @@ def me_sort_mod(me_model, obj_view):
     obj_view.setModel(ui.sortModel)
     obj_view.setSortingEnabled(True)
 
-
-# -----------встановлюємо індекс колонки, по якій будуть сортуватися дані-------------------------------------
-# ui.treeView.setSortingColumn(0)
 
 def interior(me_model, obj_view):
     # -----------Встановлюємо заголовки стовпців---------------------------------------------------------------
@@ -126,7 +122,7 @@ def interior(me_model, obj_view):
 # -----------Заповнюємо модель даних елементами з масиву------------------------------------------------------
 def setData(data_rez):
     clear_model(ui.treeView, ui.model)
-    interior(ui.model, ui.treeView)
+    # interior(ui.model, ui.treeView)
     ui.model.invisibleRootItem().clearData()
     for item in data_rez:
         root = ui.model.invisibleRootItem()
@@ -135,13 +131,16 @@ def setData(data_rez):
                         QtGui.QStandardItem(item['Price']),
                         QtGui.QStandardItem(item['Unit']),
                         QtGui.QStandardItem(item['Category'])])
+    # print(ui.model.rowCount())
     ui.treeView.setModel(ui.model)
-    interior(ui.model_null, ui.treeView_2)
-    ui.treeView_2.setModel(ui.model_null)
+    # ui.treeView.setSortingEnabled(True)
+
     ui.retranslateUi(Form)
     QtCore.QMetaObject.connectSlotsByName(Form)
     me_sort_mod(ui.model_null, ui.treeView_2)
-    ui.treeView.setSortingEnabled(True)
+    interior(ui.model_null, ui.treeView_2)
+    ui.model_null.setHorizontalHeaderLabels(['Артикул', 'Назва виробу', 'Ціна', 'Одиниці', 'Кількість'])
+    ui.treeView_2.setModel(ui.model_null)
 
 
 def clear_model(me_treeview, me_model):
@@ -167,54 +166,50 @@ def find_in():
         data_2 = find_txt_in_price(txt, data_1, 'Category')
     else:
         data_2 = data_1
-
-    if len(data_2) != len_data or len(txt) != 0:
-        ui.model2 = QStandardItemModel()
-        interior(ui.model2, ui.treeView)
-        for item in data_2:
-            ui.model2.appendRow([QtGui.QStandardItem(item['Article']),
-                                 QtGui.QStandardItem(item['Name']),
-                                 QtGui.QStandardItem(item['Price']),
-                                 QtGui.QStandardItem(item['Unit']),
-                                 QtGui.QStandardItem(item['Category'])])
-        # встановити нову модель у treeView
-        ui.treeView.setModel(ui.model2)
-        row_count = ui.model2.rowCount()
-        ui.label.setText(f"Кількість знайдених результатів: {row_count}")
-        # вивести модель
-        ui.treeView.show()
+    # print(len(data_2),len_data)
+    # if len(data_2) != len_data or len(txt) != 0:
+    ui.model2 = QStandardItemModel()
+    interior(ui.model2, ui.treeView)
+    for item in data_2:
+        ui.model2.appendRow([QtGui.QStandardItem(item['Article']),
+                             QtGui.QStandardItem(item['Name']),
+                             QtGui.QStandardItem(item['Price']),
+                             QtGui.QStandardItem(item['Unit']),
+                             QtGui.QStandardItem(item['Category'])])
+    # встановити нову модель у treeView
+    ui.treeView.setModel(ui.model2)
+    row_count = ui.model2.rowCount()
+    ui.label.setText(f"Кількість знайдених результатів: {row_count}")
+    # вивести модель
+    ui.treeView.show()
 
 
 # -----------------Метод для обробки clicked на елементі treeView-----------------------------------
 def treeView_clicked(index):
     global art_old
-    # print('--> treeView_clicked')
     my_model = index.model()
     row = index.row()
     art = my_model.index(row, 0).data()  # отримуємо артикул
-    # print('1> treeView_clicked <')
     if art != art_old:
-        # print('2> treeView_clicked <')
         art_old = art
-        # print('3> treeView_clicked <')
         update_image(art)
-    # print('treeView_clicked -->')
 
 
 # ----------------Метод для обробки подвійного doubleClicked на елементі treeView-----------------
 def treeView_doubleClicked(index):
     my_model = index.model()
-    # print(art)
     """
-        Обробляє подвійний клік на записі у treeView1.
-        Додає відповідний запис до treeView2.
-        """
+    Обробляє подвійний клік на записі у treeView1.
+    Додає відповідний запис до treeView2.
+    """
     # Отримати дані виділеної строки treeView1
-    # model = index.model()
     row_data = [my_model.data(my_model.index(index.row(), column)) for column in range(my_model.columnCount())]
-
-    # Додати рядок у treeView2
-    add_row_to_treeview(row_data, ui.treeView_2)
+    print(row_data)
+    count_me_dialog, ok_pressed = QInputDialog.getInt(QtWidgets.QWidget(), "Кількість", "Введіть кількість:", value=1)
+    if ok_pressed:
+        row_data[len(row_data) - 1] = count_me_dialog
+        # Додати рядок у treeView2
+        add_row_to_treeview(row_data, ui.treeView_2)
 
     # Оновити вигляд treeView2
     ui.treeView_2.update()
@@ -228,7 +223,7 @@ def treeView_del_selection_row(index):
 
 # ----------------Метод для обробки подвійного Clicked на елементі treeView.Header-----------------
 def handleHeaderClick(index):
-    me_sort_mod(ui.treeView.model(), ui.treeView)
+    me_sort_mod(ui.model, ui.treeView)
     # print(f'Header clicked: column {index}')
 
 
@@ -296,15 +291,12 @@ def get_image(label, pixmap):
 
 
 def update_image(art):
-    # print('-->update_image')
     global me_art
     me_art = art
     ui.label_art.setText(me_art)
     get_image(ui.label_img, load_first_image(me_art))
-    # print('> update_image <')
     c = count_image(me_art)
     if c < 0:
-        # print(f'> update_image %s<' %me_art, c)  # 62538
         ui.horizontalScrollBar.setMaximum(0)
         with open('temp/img_not.jpg', "rb") as f:
             not_img_file = f.read()
@@ -313,7 +305,6 @@ def update_image(art):
         get_image(ui.label_img, pixmap_not)
     else:
         ui.horizontalScrollBar.setMaximum(c)
-    # print('update_image -->')
 
 
 # ----------------------------------------------------------------------------------------------------------
@@ -332,8 +323,6 @@ def add_row_to_treeview(row_data, treeview):
 
 def update_price(updt=False):
     if updt:
-        # ui.progressBar.setMaximum(count_load)
-        # ui.progressBar.value(item_load)
         load_update()
         start()
 
@@ -352,6 +341,10 @@ def start():
     file_tmp = open_price()
     data = file_tmp[0]
     len_data = len(data)
+
+    # ui.treeView = MyTreeView()
+    ui.treeView.setSortingEnabled(True)
+    interior(ui.model, ui.treeView)
 
     setData(data)
 
