@@ -1,11 +1,10 @@
 from Price_Window import *
 from Open_Price import open_price
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtGui import QStandardItemModel, QPixmap
+from PyQt5.QtGui import QStandardItemModel, QPixmap, QDesktopServices
+from PyQt5.QtCore import QUrl
 from Search_txt_in_price import find_txt_in_price
-import requests
-import sys
-import random
+import requests, sys, random
 
 ua = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
@@ -143,12 +142,17 @@ def find_in():
 # -----------------Метод для обробки clicked на елементі treeView-----------------------------------
 def treeView_clicked(index):
     global art_old
+    # print('--> treeView_clicked')
     my_model = index.model()
     row = index.row()
     art = my_model.index(row, 0).data()  # отримуємо артикул
+    # print('1> treeView_clicked <')
     if art != art_old:
+        # print('2> treeView_clicked <')
         art_old = art
+        # print('3> treeView_clicked <')
         update_image(art)
+    # print('treeView_clicked -->')
 
 
 # ----------------Метод для обробки подвійного doubleClicked на елементі treeView-----------------
@@ -184,11 +188,6 @@ def handleHeaderClick(index):
     # print(f'Header clicked: column {index}')
 
 
-# ----------------Метод для обробки подвійного doubleClicked на елементі treeView.Header-----------------
-# def handleHeaderDoubleClick(index):
-#     print(f'Header double clicked: column {index}')
-
-
 # ----------------------------------------------------------------------------------------------------------
 # ---------------ЗОБРАЖЕННЯ---------------------------------------------------------------------------------
 
@@ -204,6 +203,7 @@ def load_first_image(art):
     url = url_s[0] + art + url_s[1]
     global art_old
     art_old = art
+    ui.label_5.setText('https://viyar.ua/ua/search/?q=' + art)
     return load_image(url)
 
 
@@ -229,14 +229,18 @@ def count_image(art):
     index = 0
     global pixmap_all
     pixmap_all = []
-    # print(pixmap.isNull())
-    while not pixmap.isNull():
-        pixmap_all.append(pixmap)
-        index += 1
-        n = str('_' + str(index + 1))
-        next_url = url_s[0] + art + n + url_s[1]
-        pixmap = load_image(next_url)
-        # print(index, not pixmap.isNull(), next_url)
+    # print('--> count_image')
+    try:
+        while not pixmap.isNull():
+            pixmap_all.append(pixmap)
+            index += 1
+            n = str('_' + str(index + 1))
+            next_url = url_s[0] + art + n + url_s[1]
+            pixmap = load_image(next_url)
+            # print(index, not pixmap.isNull(), next_url)
+    except:
+        print('error')
+    # print('count_image -->')
     return index - 1
 
 
@@ -263,11 +267,24 @@ def get_image(label, pixmap):
 
 
 def update_image(art):
+    # print('-->update_image')
     global me_art
     me_art = art
     ui.label_art.setText(me_art)
     get_image(ui.label_img, load_first_image(me_art))
-    ui.horizontalScrollBar.setMaximum(count_image(me_art))
+    # print('> update_image <')
+    c = count_image(me_art)
+    if c < 0:
+        print(f'> update_image %s<' %me_art, c)  # 62538
+        ui.horizontalScrollBar.setMaximum(0)
+        with open('not_img.jpg', "r") as f:
+            not_img_file = f.read()
+            pixmap = QPixmap()
+            pixmap.loadFromData(not_img_file)
+        get_image(ui.label_img, pixmap)
+    else:
+        ui.horizontalScrollBar.setMaximum(c)
+    # print('update_image -->')
 
 
 # ----------------------------------------------------------------------------------------------------------
@@ -311,16 +328,12 @@ ui.treeView.doubleClicked.connect(treeView_doubleClicked)
 ui.treeView_2.clicked.connect(treeView_clicked)
 ui.treeView_2.doubleClicked.connect(treeView_del_selection_row)
 
+ui.pushButton.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(ui.label_5.text())))
+
 header.sectionClicked.connect(handleHeaderClick)
-# header.sectionDoubleClicked.connect(handleHeaderDoubleClick)
+
 Form.show()
 update_image(art_0)
 ui.horizontalScrollBar.valueChanged.connect(slider_change)
-
-
-def retranslateUi(Form):
-    _translate = QtCore.QCoreApplication.translate
-    Form.setWindowTitle(_translate("Form", "Form"))
-
 
 sys.exit(app.exec_())
