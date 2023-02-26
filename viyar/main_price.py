@@ -277,11 +277,11 @@ def update_image(art):
     if c < 0:
         print(f'> update_image %s<' %me_art, c)  # 62538
         ui.horizontalScrollBar.setMaximum(0)
-        with open('not_img.jpg', "r") as f:
+        with open('temp/img_not.jpg', "rb") as f:
             not_img_file = f.read()
-            pixmap = QPixmap()
-            pixmap.loadFromData(not_img_file)
-        get_image(ui.label_img, pixmap)
+            pixmap_not = QPixmap()
+            pixmap_not.loadFromData(not_img_file)
+        get_image(ui.label_img, pixmap_not)
     else:
         ui.horizontalScrollBar.setMaximum(c)
     # print('update_image -->')
