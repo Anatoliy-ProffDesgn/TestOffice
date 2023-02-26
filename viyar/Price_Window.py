@@ -14,6 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
+        Form.setEnabled(True)
         Form.resize(1205, 804)
         self.label_PriceDataName = QtWidgets.QLabel(Form)
         self.label_PriceDataName.setGeometry(QtCore.QRect(10, 0, 301, 16))
@@ -77,6 +78,7 @@ class Ui_Form(object):
         self.label_5.setObjectName("label_5")
         self.verticalLayout_2.addWidget(self.label_5)
         self.label_img = QtWidgets.QLabel(self.gridLayoutWidget)
+        self.label_img.setEnabled(True)
         self.label_img.setAutoFillBackground(True)
         self.label_img.setFrameShape(QtWidgets.QFrame.WinPanel)
         self.label_img.setFrameShadow(QtWidgets.QFrame.Sunken)
@@ -86,6 +88,7 @@ class Ui_Form(object):
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.horizontalScrollBar = QtWidgets.QScrollBar(self.gridLayoutWidget)
+        self.horizontalScrollBar.setPageStep(1)
         self.horizontalScrollBar.setOrientation(QtCore.Qt.Horizontal)
         self.horizontalScrollBar.setObjectName("horizontalScrollBar")
         self.horizontalLayout.addWidget(self.horizontalScrollBar)

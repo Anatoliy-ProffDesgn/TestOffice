@@ -1,4 +1,4 @@
-from Show_ImageViwer import *
+from viyar.old.Show_ImageViwer import *
 # from ImageViwer import *
 
 # import sys

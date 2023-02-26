@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>Form</class>
  <widget class="QWidget" name="Form">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -134,6 +137,9 @@
       </item>
       <item>
        <widget class="QLabel" name="label_img">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="autoFillBackground">
          <bool>true</bool>
         </property>
@@ -152,6 +158,9 @@
        <layout class="QHBoxLayout" name="horizontalLayout" stretch="2,1">
         <item>
          <widget class="QScrollBar" name="horizontalScrollBar">
+          <property name="pageStep">
+           <number>1</number>
+          </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>

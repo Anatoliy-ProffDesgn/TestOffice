@@ -13,9 +13,10 @@ ua = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:54.0) Gecko/20100101 Firefox/54.0",
     "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36",
 ]
-user_agent = random.choice(ua)
-print(user_agent)
-global pixmap_all
+# user_agent = random.choice(ua)
+pixmap_all = []
+label_width = 0
+label_height = 0
 
 
 class CustomSortModel(QtCore.QSortFilterProxyModel):
@@ -167,31 +168,31 @@ def load_first_image(art):
     return load_image(url)
 
 
-def next_image(old_url, art):
-    index = ui.horizontalScrollBar.value()
-    if index == 0:
-        n = ''
-    else:
-        n = str('_' + str(index + 1))
-    next_url = old_url[0] + art + n + old_url[1]
-    return load_image(next_url)
+# def next_image(old_url, art):
+#     index = ui.horizontalScrollBar.value()
+#     if index == 0:
+#         n = ''
+#     else:
+#         n = str('_' + str(index + 1))
+#     next_url = old_url[0] + art + n + old_url[1]
+#     return load_image(next_url)
 
 
 def slider_change():
-    pixmap = next_image(url_s, me_art)
-    # print(type(pixmap_all(ui.horizontalScrollBar.value())))
-    # get_image(ui.label_img, pixmap_all[ui.horizontalScrollBar.value()])
-    get_image(ui.label_img, pixmap)
+    global pixmap_all
+    get_image(ui.label_img, pixmap_all[ui.horizontalScrollBar.value()])
+    # pixmap = next_image(url_s, me_art)
+    # get_image(ui.label_img, pixmap)
 
 
 def count_image(art):
     pixmap = load_first_image(art)
     index = 0
-    # global pixmap_all
+    global pixmap_all
     pixmap_all = []
     # print(pixmap.isNull())
     while not pixmap.isNull():
-        # pixmap_all.append(pixmap)
+        pixmap_all.append(pixmap)
         index += 1
         n = str('_' + str(index + 1))
         next_url = url_s[0] + art + n + url_s[1]
@@ -200,14 +201,18 @@ def count_image(art):
     return index - 1
 
 
+
+
 def get_image(label, pixmap):
     # Отримати оригінальний розмір зображення
     original_width = pixmap.width()
     original_height = pixmap.height()
-
+    global label_width
+    global label_height
     # Отримати розміри label
-    label_width = label.width()
-    label_height = label.height()
+    if label_width == 0 or label_height == 0:
+        label_width = label.width()
+        label_height = label.height()
 
     # Обчислити нові розміри зображення зберігаючи пропорцію
     if original_width > label_width or original_height > label_height:

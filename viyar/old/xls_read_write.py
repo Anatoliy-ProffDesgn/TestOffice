@@ -4,7 +4,7 @@ import xlrd as xl
 wb_name = 'newPrice1.xls'
 
 # def fun_bk(wb_name):
-wb = xl.open_workbook("newPrice1.xls",ignore_workbook_corruption=True, encoding_override='koi8_r')
+wb = xl.open_workbook("newPrice1.xls", ignore_workbook_corruption=True, encoding_override='koi8_r')
 # wb = xl.open_workbook_xls(wb_name)
 print(wb_name)
 print("The number of worksheets is {0}".format(wb.nsheets))
