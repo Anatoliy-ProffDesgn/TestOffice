@@ -59,6 +59,7 @@ class Ui_Form(object):
         self.gridLayout_2.setColumnStretch(2, 2)
         self.verticalLayout.addLayout(self.gridLayout_2)
         self.treeView = QtWidgets.QTreeView(self.gridLayoutWidget)
+        self.treeView.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.treeView.setObjectName("treeView")
         self.verticalLayout.addWidget(self.treeView)
         self.label = QtWidgets.QLabel(self.gridLayoutWidget)

@@ -17,14 +17,28 @@ ua = [
 pixmap_all = []
 label_width = 0
 label_height = 0
+art_old = ''
+global me_art
+url_s = ['https://viyar.ua/store/Items/photos/ph', '.jpg']
 
 
+# class CustomSortModel(QtCore.QSortFilterProxyModel):
+#     def lessThan(self, left, right):
+#         if left.column() == right.column() == 2 or left.column() == right.column() == 0:  # Якщо це колонка з ціною (індекс 2)
+#             left_data = float(left.data())  # if left.data() is None else ''
+#             right_data = float(right.data())  # if right.data() is None else ''
+#             return left_data < right_data
+#         else:
+#             return super().lessThan(left, right)
 class CustomSortModel(QtCore.QSortFilterProxyModel):
     def lessThan(self, left, right):
         if left.column() == right.column() == 2 or left.column() == right.column() == 0:  # Якщо це колонка з ціною (індекс 2)
-            left_data = float(left.data())
-            right_data = float(right.data())
-            return left_data < right_data
+            if left.data() and right.data():
+                left_data = float(left.data())
+                right_data = float(right.data())
+                return left_data < right_data
+            else:
+                return False
         else:
             return super().lessThan(left, right)
 
@@ -35,32 +49,35 @@ ui = Ui_Form()
 ui.setupUi(Form)
 # -----------Створюємо модель даних і встановлюємо її в treeView-------------------------------------------
 ui.model = QtGui.QStandardItemModel()
+ui.model_null = QtGui.QStandardItemModel()
 ui.treeView.setModel(ui.model)
+ui.treeView_2.setModel(ui.model_null)
 ui.treeView.setAlternatingRowColors(True)  # чергування кольру рядків
+ui.treeView_2.setAlternatingRowColors(True)  # чергування кольру рядків
 
 
 # -----------вмикаємо підтримку сортування--------------------------------------------------------------------
-def me_sort_mod(me_model):
+def me_sort_mod(me_model, obj_view):
     ui.sortModel = CustomSortModel()
     ui.sortModel.setSourceModel(me_model)
-    ui.treeView.setModel(ui.sortModel)
-    ui.treeView.setSortingEnabled(True)
+    obj_view.setModel(ui.sortModel)
+    obj_view.setSortingEnabled(True)
 
 
 # -----------встановлюємо індекс колонки, по якій будуть сортуватися дані-------------------------------------
 # ui.treeView.setSortingColumn(0)
 
-def interior(me_model):
+def interior(me_model, obj_view):
     # -----------Встановлюємо заголовки стовпців---------------------------------------------------------------
     me_model.setHorizontalHeaderLabels(['Артикул', 'Назва виробу', 'Ціна', 'Одиниці', 'Категорія'])
-    header = ui.treeView.header()
+    header = obj_view.header()
     header.resizeSection(0, 80)
     header.resizeSection(1, 400)
     header.resizeSection(2, 60)
     header.resizeSection(3, 60)
 
     # -----------встановлюємо іконку для заголовка колонки--------------------------------------------------------
-    header = ui.treeView.header()
+    header = obj_view.header()
     header.setSortIndicator(0, QtCore.Qt.AscendingOrder)
     header.setSortIndicator(1, QtCore.Qt.AscendingOrder)
     header.setSortIndicator(2, QtCore.Qt.AscendingOrder)
@@ -70,7 +87,7 @@ def interior(me_model):
 
 # -----------Заповнюємо модель даних елементами з масиву------------------------------------------------------
 def setData(data_rez):
-    interior(ui.model)
+    interior(ui.model, ui.treeView)
     ui.model.invisibleRootItem().clearData()
     for item in data_rez:
         root = ui.model.invisibleRootItem()
@@ -80,9 +97,11 @@ def setData(data_rez):
                         QtGui.QStandardItem(item['Unit']),
                         QtGui.QStandardItem(item['Category'])])
     ui.treeView.setModel(ui.model)
+    interior(ui.model_null, ui.treeView_2)
+    ui.treeView_2.setModel(ui.model_null)
     ui.retranslateUi(Form)
     QtCore.QMetaObject.connectSlotsByName(Form)
-    # me_sort_mod(ui.model)
+    me_sort_mod(ui.model_null, ui.treeView_2)
     ui.treeView.setSortingEnabled(True)
 
 
@@ -106,7 +125,7 @@ def find_in():
 
     if len(data_2) != len_dada or len(txt) != 0:
         ui.model2 = QStandardItemModel()
-        interior(ui.model2)
+        interior(ui.model2, ui.treeView)
         for item in data_2:
             ui.model2.appendRow([QtGui.QStandardItem(item['Article']),
                                  QtGui.QStandardItem(item['Name']),
@@ -123,10 +142,13 @@ def find_in():
 
 # -----------------Метод для обробки clicked на елементі treeView-----------------------------------
 def treeView_clicked(index):
+    global art_old
     my_model = index.model()
     row = index.row()
     art = my_model.index(row, 0).data()  # отримуємо артикул
-    update_image(art)
+    if art != art_old:
+        art_old = art
+        update_image(art)
 
 
 # ----------------Метод для обробки подвійного doubleClicked на елементі treeView-----------------
@@ -135,25 +157,40 @@ def treeView_doubleClicked(index):
     row = index.row()
     art = my_model.index(row, 0).data()  # отримуємо артикул
     print(art)
+    """
+        Обробляє подвійний клік на записі у treeView1.
+        Додає відповідний запис до treeView2.
+        """
+    # Отримати дані виділеної строки treeView1
+    # model = index.model()
+    row_data = [my_model.data(my_model.index(index.row(), column)) for column in range(my_model.columnCount())]
+
+    # Додати рядок у treeView2
+    add_row_to_treeview(row_data, ui.treeView_2)
+
+    # Оновити вигляд treeView2
+    ui.treeView_2.update()
+
+
+def treeView_del_selection_row(index):
+    model = ui.treeView_2.model()
+    row = index.row()
+    model.removeRow(row)
 
 
 # ----------------Метод для обробки подвійного Clicked на елементі treeView.Header-----------------
 def handleHeaderClick(index):
-    print(f'Header clicked: column {index}')
-    me_sort_mod(ui.treeView.model())
+    me_sort_mod(ui.treeView.model(), ui.treeView)
+    # print(f'Header clicked: column {index}')
 
 
 # ----------------Метод для обробки подвійного doubleClicked на елементі treeView.Header-----------------
-def handleHeaderDoubleClick(index):
-    print(f'Header double clicked: column {index}')
+# def handleHeaderDoubleClick(index):
+#     print(f'Header double clicked: column {index}')
 
 
 # ----------------------------------------------------------------------------------------------------------
 # ---------------ЗОБРАЖЕННЯ---------------------------------------------------------------------------------
-
-url_s = ['https://viyar.ua/store/Items/photos/ph', '.jpg']
-
-global me_art
 
 
 def load_image(url):
@@ -165,6 +202,8 @@ def load_image(url):
 
 def load_first_image(art):
     url = url_s[0] + art + url_s[1]
+    global art_old
+    art_old = art
     return load_image(url)
 
 
@@ -201,8 +240,6 @@ def count_image(art):
     return index - 1
 
 
-
-
 def get_image(label, pixmap):
     # Отримати оригінальний розмір зображення
     original_width = pixmap.width()
@@ -236,6 +273,16 @@ def update_image(art):
 # ----------------------------------------------------------------------------------------------------------
 # ---------------END ЗОБРАЖЕННЯ---------------------------------------------------------------------------------
 
+def add_row_to_treeview(row_data, treeview):
+    """
+    Додає рядок до заданого дерева вузлів.
+    """
+    model = treeview.model()
+    model.insertRow(model.rowCount())
+    for column, value in enumerate(row_data):
+        index = model.index(model.rowCount() - 1, column)
+        model.setData(index, value)
+
 
 tmp = []
 file_tmp = open_price()
@@ -257,10 +304,15 @@ header = ui.treeView.header()
 ui.lineEdit_SearchName.textChanged.connect(find_in)
 ui.lineEdit_SearchCategori.textChanged.connect(find_in)
 ui.lineEdit_SearchArt.textChanged.connect(find_in)
+
 ui.treeView.clicked.connect(treeView_clicked)
 ui.treeView.doubleClicked.connect(treeView_doubleClicked)
+
+ui.treeView_2.clicked.connect(treeView_clicked)
+ui.treeView_2.doubleClicked.connect(treeView_del_selection_row)
+
 header.sectionClicked.connect(handleHeaderClick)
-header.sectionDoubleClicked.connect(handleHeaderDoubleClick)
+# header.sectionDoubleClicked.connect(handleHeaderDoubleClick)
 Form.show()
 update_image(art_0)
 ui.horizontalScrollBar.valueChanged.connect(slider_change)
