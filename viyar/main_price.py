@@ -158,9 +158,7 @@ def treeView_clicked(index):
 # ----------------Метод для обробки подвійного doubleClicked на елементі treeView-----------------
 def treeView_doubleClicked(index):
     my_model = index.model()
-    row = index.row()
-    art = my_model.index(row, 0).data()  # отримуємо артикул
-    print(art)
+    # print(art)
     """
         Обробляє подвійний клік на записі у treeView1.
         Додає відповідний запис до treeView2.
@@ -207,21 +205,9 @@ def load_first_image(art):
     return load_image(url)
 
 
-# def next_image(old_url, art):
-#     index = ui.horizontalScrollBar.value()
-#     if index == 0:
-#         n = ''
-#     else:
-#         n = str('_' + str(index + 1))
-#     next_url = old_url[0] + art + n + old_url[1]
-#     return load_image(next_url)
-
-
 def slider_change():
     global pixmap_all
     get_image(ui.label_img, pixmap_all[ui.horizontalScrollBar.value()])
-    # pixmap = next_image(url_s, me_art)
-    # get_image(ui.label_img, pixmap)
 
 
 def count_image(art):
@@ -230,16 +216,13 @@ def count_image(art):
     global pixmap_all
     pixmap_all = []
     # print('--> count_image')
-    try:
-        while not pixmap.isNull():
-            pixmap_all.append(pixmap)
-            index += 1
-            n = str('_' + str(index + 1))
-            next_url = url_s[0] + art + n + url_s[1]
-            pixmap = load_image(next_url)
-            # print(index, not pixmap.isNull(), next_url)
-    except:
-        print('error')
+    while not pixmap.isNull():
+        pixmap_all.append(pixmap)
+        index += 1
+        n = str('_' + str(index + 1))
+        next_url = url_s[0] + art + n + url_s[1]
+        pixmap = load_image(next_url)
+        # print(index, not pixmap.isNull(), next_url)
     # print('count_image -->')
     return index - 1
 
@@ -275,7 +258,7 @@ def update_image(art):
     # print('> update_image <')
     c = count_image(me_art)
     if c < 0:
-        print(f'> update_image %s<' %me_art, c)  # 62538
+        # print(f'> update_image %s<' %me_art, c)  # 62538
         ui.horizontalScrollBar.setMaximum(0)
         with open('temp/img_not.jpg', "rb") as f:
             not_img_file = f.read()
