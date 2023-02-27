@@ -1,8 +1,12 @@
 from Price_Window import *
 from Open_Price import open_price
+from main_Full_Updete_Price import *
+# from Parse_html import item_load, count_load
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QStandardItemModel, QPixmap, QDesktopServices
 from PyQt5.QtCore import QUrl
+from PyQt5.QtWidgets import QApplication, QDialog, QLabel, QVBoxLayout
+
 from Search_txt_in_price import find_txt_in_price
 import requests, sys, random
 
@@ -12,23 +16,16 @@ ua = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:54.0) Gecko/20100101 Firefox/54.0",
     "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36",
 ]
-# user_agent = random.choice(ua)
+
 pixmap_all = []
 label_width = 0
 label_height = 0
 art_old = ''
 global me_art
+global data
 url_s = ['https://viyar.ua/store/Items/photos/ph', '.jpg']
 
 
-# class CustomSortModel(QtCore.QSortFilterProxyModel):
-#     def lessThan(self, left, right):
-#         if left.column() == right.column() == 2 or left.column() == right.column() == 0:  # Якщо це колонка з ціною (індекс 2)
-#             left_data = float(left.data())  # if left.data() is None else ''
-#             right_data = float(right.data())  # if right.data() is None else ''
-#             return left_data < right_data
-#         else:
-#             return super().lessThan(left, right)
 class CustomSortModel(QtCore.QSortFilterProxyModel):
     def lessThan(self, left, right):
         if left.column() == right.column() == 2 or left.column() == right.column() == 0:  # Якщо це колонка з ціною (індекс 2)
@@ -86,6 +83,7 @@ def interior(me_model, obj_view):
 
 # -----------Заповнюємо модель даних елементами з масиву------------------------------------------------------
 def setData(data_rez):
+    clear_model(ui.treeView, ui.model)
     interior(ui.model, ui.treeView)
     ui.model.invisibleRootItem().clearData()
     for item in data_rez:
@@ -104,8 +102,14 @@ def setData(data_rez):
     ui.treeView.setSortingEnabled(True)
 
 
+def clear_model(me_treeView, me_model):
+    me_model.removeRows(0, me_model.rowCount())
+    me_treeView.setModel(me_model)
+
+
 # -----------------функція пошуку по назві-----------------------------------------------------
 def find_in():
+    global data
     txt = ui.lineEdit_SearchArt.text()
     if len(txt) > 0:
         data_0 = find_txt_in_price(txt, data, 'Article')
@@ -122,7 +126,7 @@ def find_in():
     else:
         data_2 = data_1
 
-    if len(data_2) != len_dada or len(txt) != 0:
+    if len(data_2) != len_data or len(txt) != 0:
         ui.model2 = QStandardItemModel()
         interior(ui.model2, ui.treeView)
         for item in data_2:
@@ -284,21 +288,38 @@ def add_row_to_treeview(row_data, treeview):
         model.setData(index, value)
 
 
-tmp = []
-file_tmp = open_price()
-data = file_tmp[0]
-len_dada = len(data)
+def update_price(updt=False):
+    if updt:
+        # ui.progressBar.setMaximum(count_load)
+        # ui.progressBar.value(item_load)
+        load_update()
+        start()
 
-setData(data)
 
-r = str(ui.treeView.model().rowCount())
-nm_prise = str(file_tmp[1]).split('.')[-2].split('/')[-1]
+global art_0
+global tmp
+global len_data
 
-ui.label_PriceDataName.setText(nm_prise)
-ui.label.setText('Кількість знайдених результатів: ' + r)
-art_0 = ui.treeView.model().index(0, 0).data()
 
-header = ui.treeView.header()
+def start():
+    global art_0
+    global tmp
+    global data
+    global len_data
+    tmp = []
+    file_tmp = open_price()
+    data = file_tmp[0]
+    len_data = len(data)
+
+    setData(data)
+
+    r = str(ui.treeView.model().rowCount())
+    nm_prise = str(file_tmp[1]).split('.')[-2].split('/')[-1]
+
+    ui.label_PriceDataName.setText(nm_prise)
+    ui.label.setText('Кількість знайдених результатів: ' + r)
+    art_0 = ui.treeView.model().index(0, 0).data()
+
 
 # --------------------Підключення сигналів-------------------------------------------------------------
 ui.lineEdit_SearchName.textChanged.connect(find_in)
@@ -312,8 +333,14 @@ ui.treeView_2.clicked.connect(treeView_clicked)
 ui.treeView_2.doubleClicked.connect(treeView_del_selection_row)
 
 ui.pushButton.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(ui.label_5.text())))
+ui.pushButton_Update.clicked.connect(lambda: update_price(True))
+ui.pushButton_Clear.clicked.connect(lambda: clear_model(ui.treeView_2, ui.model_null))
 
+header = ui.treeView.header()
 header.sectionClicked.connect(handleHeaderClick)
+
+if __name__ == "__main__":
+    start()
 
 Form.show()
 update_image(art_0)

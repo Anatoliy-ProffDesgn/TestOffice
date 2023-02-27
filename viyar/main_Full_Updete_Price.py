@@ -15,12 +15,13 @@ from Parse_html import full_price as f_price
 # else:
 #     re = False
 
-
 # ---------------Load (and/or) Update and save in json------------------
 def load_update(load_in_url=True, update_in_file=True, file_name=''):
     if file_name == "":
         date = d.date.today().strftime("%d_%m_%Y")
         price_file_name = './Price/Віяр фурнітура прайс ' + date + '.json'
+    else:
+        price_file_name = file_name
     if load_in_url:
         Load_price.download_price(urls)
     if update_in_file:
