@@ -1,14 +1,52 @@
-from Price_Window import *
-from Open_Price import open_price
-from main_Full_Updete_Price import *
-# from Parse_html import item_load, count_load
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtGui import QStandardItemModel, QPixmap, QDesktopServices
-from PyQt5.QtCore import QUrl
-from PyQt5.QtWidgets import QApplication, QDialog, QLabel, QVBoxLayout
+import random
+import sys
 
+import requests
+from PyQt5.QtCore import QUrl
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QStandardItemModel, QDesktopServices
+
+import img_viwer
+from Open_Price import open_price
+from Price_Window import *
 from Search_txt_in_price import find_txt_in_price
-import requests, sys, random
+from main_Full_Updete_Price import *
+
+
+class MyForm(QtWidgets.QWidget):
+    def __init__(self):
+        super().__init__()
+
+        self.ui = Ui_Form()
+        self.ui.setupUi(self)
+        self.ui.label_img.mouseDoubleClickEvent = self.viwe_img
+
+    indx = 0
+    def viwe_img(self, pixmap_all, index):
+        index = 0 if index > len(pixmap_all) else index
+        global indx
+        indx=index
+        pixmap = QPixmap(pixmap_all[index])  # ui.horizontalScrollBar.value()
+        img_viwer.Form_viwer = QtWidgets.QWidget()
+        ui_viwer = img_viwer.Ui_Form_viwer()
+        ui_viwer.setupUi(img_viwer.Form_viwer)
+        ui_viwer.label.setPixmap(pixmap)
+        img_viwer.Form_viwer.show()
+        app.exec_()
+
+    # def next_image(self):
+    #     self.indx += 1
+    #     pixmap = QPixmap(pixmap_all[self.indx])
+    #     self.ui_viwer.label.setPixmap(pixmap)
+    #
+    # def prev_image(self):
+    #     self.indx -= 1
+    #     pixmap = QPixmap(pixmap_all[self.indx])
+    #     self.ui_viwer.label.setPixmap(pixmap)
+    #
+    # # ui_viwer = img_viwer.Ui_Form_viwer()
+    # self.ui_viwer.pushButton_up.clicked.connect(next_image())
+    # self.ui_viwer.pushButton_down.clicked.connect(prev_image)
 
 ua = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
@@ -25,6 +63,10 @@ global me_art
 global data
 url_s = ['https://viyar.ua/store/Items/photos/ph', '.jpg']
 
+
+# class viwe_img(ui_viwe):
+#     def __init__(self):
+#         super().__init__()
 
 class CustomSortModel(QtCore.QSortFilterProxyModel):
     def lessThan(self, left, right):
@@ -102,9 +144,9 @@ def setData(data_rez):
     ui.treeView.setSortingEnabled(True)
 
 
-def clear_model(me_treeView, me_model):
+def clear_model(me_treeview, me_model):
     me_model.removeRows(0, me_model.rowCount())
-    me_treeView.setModel(me_model)
+    me_treeview.setModel(me_model)
 
 
 # -----------------функція пошуку по назві-----------------------------------------------------
@@ -139,7 +181,7 @@ def find_in():
         ui.treeView.setModel(ui.model2)
         row_count = ui.model2.rowCount()
         ui.label.setText(f"Кількість знайдених результатів: {row_count}")
-        # відобразити модель
+        # вивести модель
         ui.treeView.show()
 
 
@@ -335,6 +377,8 @@ ui.treeView_2.doubleClicked.connect(treeView_del_selection_row)
 ui.pushButton.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(ui.label_5.text())))
 ui.pushButton_Update.clicked.connect(lambda: update_price(True))
 ui.pushButton_Clear.clicked.connect(lambda: clear_model(ui.treeView_2, ui.model_null))
+
+ui.label_img.mouseDoubleClickEvent = lambda event: MyForm().viwe_img(pixmap_all, ui.horizontalScrollBar.value())
 
 header = ui.treeView.header()
 header.sectionClicked.connect(handleHeaderClick)
