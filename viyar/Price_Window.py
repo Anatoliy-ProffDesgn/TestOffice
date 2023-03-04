@@ -65,7 +65,7 @@ class Ui_Form(object):
         self.treeView = QtWidgets.QTreeView(self.gridLayoutWidget)
         self.treeView.setBaseSize(QtCore.QSize(747, 455))
         self.treeView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.treeView.setEditTriggers(QtWidgets.QAbstractItemView.DoubleClicked|QtWidgets.QAbstractItemView.EditKeyPressed)
+        self.treeView.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.treeView.setObjectName("treeView")
         self.verticalLayout.addWidget(self.treeView)
         self.label = QtWidgets.QLabel(self.gridLayoutWidget)

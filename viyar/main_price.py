@@ -6,6 +6,7 @@ from PyQt5.QtCore import QUrl, Qt
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtGui import QStandardItemModel, QDesktopServices
 from PyQt5.QtWidgets import QInputDialog, QFileDialog
+import datetime
 
 import img_viwer
 from Open_Price import open_price
@@ -103,6 +104,7 @@ def me_sort_mod(me_model, obj_view):
     ui.sortModel = CustomSortModel()
     ui.sortModel.setSourceModel(me_model)
     obj_view.setModel(ui.sortModel)
+    obj_view.selectionModel().selectionChanged.connect(treeView_selectionChanged)
     obj_view.setSortingEnabled(True)
 
 
@@ -229,7 +231,7 @@ def treeView_del_selection_row(index):
 
 # ----------------Метод для обробки подвійного Clicked на елементі treeView.Header-----------------
 def handleHeaderClick(index):
-    me_sort_mod(ui.model, ui.treeView)
+    me_sort_mod(ui.treeView.model(), ui.treeView)
     # print(f'Header clicked: column {index}')
 
 
@@ -362,6 +364,7 @@ def start():
     ui.label.setText('Кількість знайдених результатів: ' + r)
     art_0 = ui.treeView.model().index(0, 0).data()
 
+
 # ------------------conext menu-------------------------------------------------
 # ------------------------------------------------------------------------------
 def showContextMenu(point):
@@ -409,40 +412,42 @@ def on_action_kol_triggered():
         model.setData(itm, count_me_dialog)
         ui.treeView_2.update(itm)
 
+
 def on_action_del_triggered():
     # print("Action 4 triggered")
     treeView_del_selection_row(ui.treeView_2.currentIndex())
 
+
 # --------------------------Save file-----------------------------------------------------------------
 def save_to_csv():
     # Відкрити діалогове вікно для вибору шляху до файлу
-    path, _ = QtWidgets.QFileDialog.getSaveFileName(Form, "Save File", "", "CSV Files (*.csv)")
+    if ui.treeView_2.model().rowCount() > 0:
+        f_name = 'Замовлення фурнітури Віяр від ' + datetime.datetime.now().strftime('%d_%m_%Y')
+        file_dialog = QtWidgets.QFileDialog(Form)
+        file_dialog.setDirectory('/temp/')
+        path, _ = file_dialog.getSaveFileName(Form, "Save File", f_name, "CSV Files (*.csv)")
 
-    if path:
-        # Відкрити файл для запису
-        with open('Shablon/viyar_form_furniture.csv', newline='') as csvfile:
-            dialect = csv.Sniffer().sniff(csvfile.read(1024))
-            sep = str(dialect.delimiter)
-            print(sep)
-        with open(path, "w", newline="") as f:
-            writer = csv.writer(f, delimiter = sep)
+        if path:
+            # Відкрити файл для запису
+            with open('Shablon/viyar_form_furniture.csv', newline='') as csvfile:
+                dialect = csv.Sniffer().sniff(csvfile.read(1024))
+                sep = str(dialect.delimiter)
+                print(sep)
+            with open(path, "w", newline="") as f:
+                writer = csv.writer(f, delimiter=sep)
 
-            # Записати заголовки
-            headers = []
-            for i in range(ui.model_null.columnCount()):
-                header = ui.model_null.headerData(i, QtCore.Qt.Horizontal)
-                headers.append(header)
-            writer.writerow(headers)
+                # Записати заголовки
+                headers = ['Код', 'К-во']
+                writer.writerow(headers)
 
-            # Записати дані
-            for row in range(ui.model_null.rowCount()):
-                values = []
-                for col in range(ui.model_null.columnCount()):
-                    index = ui.model_null.index(row, col)
-                    value = str(ui.model_null.data(index))
-                    values.append(value)
-                writer.writerow(values)
-
+                # Записати дані
+                for row in range(ui.model_null.rowCount()):
+                    kod = str(ui.model_null.data(ui.model_null.index(row, 0)))
+                    kol = str(ui.model_null.data(ui.model_null.index(row, 4)))
+                    values = [kod, kol]
+                    writer.writerow(values)
+                    if row == 1:
+                        break
 
 
 # --------------------Підключення сигналів-------------------------------------------------------------
