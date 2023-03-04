@@ -14,15 +14,15 @@ from Search_txt_in_price import find_txt_in_price
 from main_Full_Updete_Price import *
 
 
-# class MyTreeView(QTreeView):
-#     def __init__(self):
-#         super().__init__()
-#
-#     def keyPressEvent(self, event):
-#         if event.type() == event.KeyPress:
-#             print(f"Натиснута клавіша {event.key()} ({Qt.Key(event.key())})")
-#         super().keyPressEvent(event)
+class MyTreeViewPrice(QtWidgets.QTreeView):
+    def __init__(self, parent=None):
+        super().__init__(parent)
 
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key_Space:
+            print("Space key pressed")
+        else:
+            super().keyPressEvent(event)
 
 class MyForm(QtWidgets.QWidget):
     def __init__(self):
@@ -32,7 +32,36 @@ class MyForm(QtWidgets.QWidget):
         self.ui.setupUi(self)
         self.ui.label_img.mouseDoubleClickEvent = self.viwe_img
 
-    indx = 0
+        model = QtGui.QStandardItemModel()
+        self.ui.treeView.setModel(model)
+
+        tree_size_policy = self.ui.treeView.sizePolicy()
+        tree_geometry = self.ui.treeView.geometry()
+        print('tree_size_policy',tree_size_policy)
+        print('tree_geometry',tree_geometry)
+        self.ui.myTreeViewPrice = MyTreeViewPrice(self.ui.gridLayoutWidget)
+        self.ui.myTreeViewPrice.setSizePolicy(tree_size_policy)
+        self.ui.myTreeViewPrice.setGeometry(tree_geometry)
+
+        # self.ui.gridLayoutWidget.addWidget(self.ui.myTreeViewPrice)
+
+        self.ui.treeView.keyPressEvent = self.me_keyPressEvent
+        self.ui.treeView.installEventFilter(self)
+
+    def me_keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key_Space:
+            print('me_keyPressEvent', event.key())
+        else:
+            self.parent().keyPressEvent(event)
+
+    def eventFilter(self, source, event):
+        if event.type() == QtCore.QEvent.KeyPress:
+            if event.key() == QtCore.Qt.Key_Space:
+                print('eventFilter', event.key())
+            else:
+                return super().eventFilter(source, event)
+        else:
+            return super().eventFilter(source, event)
 
     def viwe_img(self, pixmap_all, index):
         index = 0 if index > len(pixmap_all) else index
@@ -46,13 +75,9 @@ class MyForm(QtWidgets.QWidget):
         img_viwer.Form_viwer.show()
         app.exec_()
 
-    def keyPressEvent(self, event):  # , row_data_list, treeview_obj):
-        if event.key() == QtCore.Qt.Key_Space:
-            # Викликати вашу функцію
-            # add_row_to_treeview(row_data_list, treeview_obj)
-            print(event.key)
-        else:
-            super().keyPressEvent(event)
+
+# ui.treeView.keyPressEvent = ui.treeView.keyPressEvent
+
 
 
 ua = [
@@ -85,11 +110,14 @@ class CustomSortModel(QtCore.QSortFilterProxyModel):
 
 
 app = QtWidgets.QApplication(sys.argv)
-Form = QtWidgets.QWidget()
+# Form = QtWidgets.QWidget()
+Form = MyForm()
 ui = Ui_Form()
 ui.setupUi(Form)
 # -----------Створюємо модель даних і встановлюємо її в treeView-------------------------------------------
 ui.model = QtGui.QStandardItemModel()
+ui.treeView = MyTreeViewPrice(ui.treeView)
+
 ui.treeView.setModel(ui.model)
 ui.treeView.setAlternatingRowColors(True)  # чергування кольру рядків
 
@@ -190,9 +218,8 @@ def find_in():
 
 
 # -----------------Метод для обробки clicked на елементі treeView-----------------------------------
-def treeView_selectionChanged(selected, deselected):
+def treeView_clicked(index):
     global art_old
-    index = selected.indexes()[0]
     my_model = index.model()
     row = index.row()
     art = my_model.index(row, 0).data()  # отримуємо артикул
@@ -208,7 +235,7 @@ def treeView_doubleClicked(index):
     Обробляє подвійний клік на записі у treeView1.
     Додає відповідний запис до treeView2.
     """
-    # Отримати дані виділеного рядка treeView1
+    # Отримати дані виділеної строки treeView1
     row_data = [my_model.data(my_model.index(index.row(), column)) for column in range(my_model.columnCount())]
     print(row_data)
     count_me_dialog, ok_pressed = QInputDialog.getInt(QtWidgets.QWidget(), "Кількість", "Введіть кількість:", value=1)
@@ -304,7 +331,7 @@ def update_image(art):
     c = count_image(me_art)
     if c < 0:
         ui.horizontalScrollBar.setMaximum(0)
-        with open('temp/img_not.jpg', "rb") as f:
+        with open('../temp/img_not.jpg', "rb") as f:
             not_img_file = f.read()
             pixmap_not = QPixmap()
             pixmap_not.loadFromData(not_img_file)
@@ -348,7 +375,7 @@ def start():
     data = file_tmp[0]
     len_data = len(data)
 
-    # ui.treeView = MyTreeView()
+    # ui.treeView = MyTreeViewPrice()
     ui.treeView.setSortingEnabled(True)
     interior(ui.model, ui.treeView)
 
@@ -362,70 +389,17 @@ def start():
     art_0 = ui.treeView.model().index(0, 0).data()
 
 
-def showContextMenu(point):
-    menu = QtWidgets.QMenu(ui.treeView)
-    # додавання пункту меню
-    action_add = menu.addAction('Додати до списку замовлення')
-    # action2 = menu.addAction('Action 2')
-    # показ контекстного меню
-    action_add.triggered.connect(on_action_add_triggered)
-    # action_add.triggered.connect(lambda: print('1'))
-    # action2.triggered.connect(lambda: print('Action 2 triggered'))
-    menu.exec_(ui.treeView.mapToGlobal(point))
-
-
-def showContextMenu_2(point):  # якщо модель порожня, виконуємо певні дії
-    menu_2 = QtWidgets.QMenu(ui.treeView_2)
-    # додавання пункту меню
-    action_kol = menu_2.addAction('Змінити кількість')
-    action_del = menu_2.addAction('Відалити з списку замовлення')
-    # показ контекстного меню
-    if ui.treeView_2.model().rowCount() > 0:
-        action_kol.triggered.connect(on_action_kol_triggered)
-        action_del.triggered.connect(on_action_del_triggered)
-        # print("Дані присутні")
-    else:
-        # якщо модель не порожня, виконуємо інші дії
-        action_kol.setEnabled(False)
-        action_del.setEnabled(False)
-        # print("Дані відсутні")
-    menu_2.exec_(ui.treeView_2.mapToGlobal(point))
-
-
-def on_action_add_triggered():
-    # print("Action 1 triggered")
-    treeView_doubleClicked(ui.treeView.currentIndex())
-
-
-def on_action_kol_triggered():
-    count_me_dialog, ok_pressed = QInputDialog.getInt(QtWidgets.QWidget(), "Кількість", "Введіть кількість:", value=1)
-    if ok_pressed:
-        model = ui.treeView_2.model()
-        row = ui.treeView_2.currentIndex().row()
-        column = 4
-        itm = model.index(row, column)
-        model.setData(itm, count_me_dialog)
-        ui.treeView_2.update(itm)
-
-
-def on_action_del_triggered():
-    # print("Action 4 triggered")
-    treeView_del_selection_row(ui.treeView_2.currentIndex())
-
-
 # --------------------Підключення сигналів-------------------------------------------------------------
 ui.lineEdit_SearchName.textChanged.connect(find_in)
 ui.lineEdit_SearchCategori.textChanged.connect(find_in)
 ui.lineEdit_SearchArt.textChanged.connect(find_in)
 
-# ui.treeView.clicked.connect(treeView_clicked)
-ui.treeView.selectionModel().selectionChanged.connect(treeView_selectionChanged)
+ui.treeView.clicked.connect(treeView_clicked)
 ui.treeView.doubleClicked.connect(treeView_doubleClicked)
-ui.treeView.customContextMenuRequested.connect(showContextMenu)
+# ui.treeView.keyPressEvent = ui.treeView.keyPressEvent
 
-ui.treeView_2.selectionModel().selectionChanged.connect(treeView_selectionChanged)
+ui.treeView_2.clicked.connect(treeView_clicked)
 ui.treeView_2.doubleClicked.connect(treeView_del_selection_row)
-ui.treeView_2.customContextMenuRequested.connect(showContextMenu_2)
 
 ui.pushButton.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(ui.label_5.text())))
 ui.pushButton_Update.clicked.connect(lambda: update_price(True))

@@ -27,6 +27,7 @@ class Ui_Form(object):
         self.gridLayout.setSpacing(8)
         self.gridLayout.setObjectName("gridLayout")
         self.treeView_2 = QtWidgets.QTreeView(self.gridLayoutWidget)
+        self.treeView_2.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.treeView_2.setObjectName("treeView_2")
         self.gridLayout.addWidget(self.treeView_2, 1, 0, 1, 1)
         self.verticalLayout = QtWidgets.QVBoxLayout()
@@ -62,6 +63,8 @@ class Ui_Form(object):
         self.gridLayout_2.setColumnStretch(2, 2)
         self.verticalLayout.addLayout(self.gridLayout_2)
         self.treeView = QtWidgets.QTreeView(self.gridLayoutWidget)
+        self.treeView.setBaseSize(QtCore.QSize(747, 455))
+        self.treeView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.treeView.setEditTriggers(QtWidgets.QAbstractItemView.DoubleClicked|QtWidgets.QAbstractItemView.EditKeyPressed)
         self.treeView.setObjectName("treeView")
         self.verticalLayout.addWidget(self.treeView)
@@ -194,6 +197,20 @@ class Ui_Form(object):
 
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
+        Form.setTabOrder(self.lineEdit_SearchName, self.treeView)
+        Form.setTabOrder(self.treeView, self.treeView_2)
+        Form.setTabOrder(self.treeView_2, self.pushButton_SaveViyar)
+        Form.setTabOrder(self.pushButton_SaveViyar, self.pushButton_Update)
+        Form.setTabOrder(self.pushButton_Update, self.lineEdit_SearchArt)
+        Form.setTabOrder(self.lineEdit_SearchArt, self.lineEdit_SearchCategori)
+        Form.setTabOrder(self.lineEdit_SearchCategori, self.pushButton_Clear)
+        Form.setTabOrder(self.pushButton_Clear, self.pushButton_SaveCustom)
+        Form.setTabOrder(self.pushButton_SaveCustom, self.pushButton_OpenViyar)
+        Form.setTabOrder(self.pushButton_OpenViyar, self.pushButton_8)
+        Form.setTabOrder(self.pushButton_8, self.pushButton_9)
+        Form.setTabOrder(self.pushButton_9, self.radioButton_All)
+        Form.setTabOrder(self.radioButton_All, self.radioButton_Custom)
+        Form.setTabOrder(self.radioButton_Custom, self.pushButton)
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
