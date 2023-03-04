@@ -1,11 +1,11 @@
 import random
 import sys
-
+import csv
 import requests
 from PyQt5.QtCore import QUrl, Qt
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtGui import QStandardItemModel, QDesktopServices
-from PyQt5.QtWidgets import QInputDialog, QTreeView
+from PyQt5.QtWidgets import QInputDialog, QFileDialog
 
 import img_viwer
 from Open_Price import open_price
@@ -139,7 +139,6 @@ def setData(data_rez):
     # print(ui.model.rowCount())
     ui.treeView.setModel(ui.model)
     # ui.treeView.setSortingEnabled(True)
-
     ui.retranslateUi(Form)
     QtCore.QMetaObject.connectSlotsByName(Form)
     me_sort_mod(ui.model_null, ui.treeView_2)
@@ -183,6 +182,7 @@ def find_in():
                              QtGui.QStandardItem(item['Category'])])
     # встановити нову модель у treeView
     ui.treeView.setModel(ui.model2)
+    ui.treeView.selectionModel().selectionChanged.connect(treeView_selectionChanged)
     row_count = ui.model2.rowCount()
     ui.label.setText(f"Кількість знайдених результатів: {row_count}")
     # вивести модель
@@ -304,7 +304,7 @@ def update_image(art):
     c = count_image(me_art)
     if c < 0:
         ui.horizontalScrollBar.setMaximum(0)
-        with open('temp/img_not.jpg', "rb") as f:
+        with open('Shablon/img_not.jpg', "rb") as f:
             not_img_file = f.read()
             pixmap_not = QPixmap()
             pixmap_not.loadFromData(not_img_file)
@@ -325,6 +325,7 @@ def add_row_to_treeview(row_data, treeview):
     for column, value in enumerate(row_data):
         index = model.index(model.rowCount() - 1, column)
         model.setData(index, value)
+    treeview.selectionModel().selectionChanged.connect(treeView_selectionChanged)
 
 
 def update_price(updt=False):
@@ -361,7 +362,8 @@ def start():
     ui.label.setText('Кількість знайдених результатів: ' + r)
     art_0 = ui.treeView.model().index(0, 0).data()
 
-
+# ------------------conext menu-------------------------------------------------
+# ------------------------------------------------------------------------------
 def showContextMenu(point):
     menu = QtWidgets.QMenu(ui.treeView)
     # додавання пункту меню
@@ -378,7 +380,7 @@ def showContextMenu_2(point):  # якщо модель порожня, вико�
     menu_2 = QtWidgets.QMenu(ui.treeView_2)
     # додавання пункту меню
     action_kol = menu_2.addAction('Змінити кількість')
-    action_del = menu_2.addAction('Відалити з списку замовлення')
+    action_del = menu_2.addAction('Відалити зі списку замовлення')
     # показ контекстного меню
     if ui.treeView_2.model().rowCount() > 0:
         action_kol.triggered.connect(on_action_kol_triggered)
@@ -407,10 +409,40 @@ def on_action_kol_triggered():
         model.setData(itm, count_me_dialog)
         ui.treeView_2.update(itm)
 
-
 def on_action_del_triggered():
     # print("Action 4 triggered")
     treeView_del_selection_row(ui.treeView_2.currentIndex())
+
+# --------------------------Save file-----------------------------------------------------------------
+def save_to_csv():
+    # Відкрити діалогове вікно для вибору шляху до файлу
+    path, _ = QtWidgets.QFileDialog.getSaveFileName(Form, "Save File", "", "CSV Files (*.csv)")
+
+    if path:
+        # Відкрити файл для запису
+        with open('Shablon/viyar_form_furniture.csv', newline='') as csvfile:
+            dialect = csv.Sniffer().sniff(csvfile.read(1024))
+            sep = str(dialect.delimiter)
+            print(sep)
+        with open(path, "w", newline="") as f:
+            writer = csv.writer(f, delimiter = sep)
+
+            # Записати заголовки
+            headers = []
+            for i in range(ui.model_null.columnCount()):
+                header = ui.model_null.headerData(i, QtCore.Qt.Horizontal)
+                headers.append(header)
+            writer.writerow(headers)
+
+            # Записати дані
+            for row in range(ui.model_null.rowCount()):
+                values = []
+                for col in range(ui.model_null.columnCount()):
+                    index = ui.model_null.index(row, col)
+                    value = str(ui.model_null.data(index))
+                    values.append(value)
+                writer.writerow(values)
+
 
 
 # --------------------Підключення сигналів-------------------------------------------------------------
@@ -419,17 +451,18 @@ ui.lineEdit_SearchCategori.textChanged.connect(find_in)
 ui.lineEdit_SearchArt.textChanged.connect(find_in)
 
 # ui.treeView.clicked.connect(treeView_clicked)
+ui.treeView.customContextMenuRequested.connect(showContextMenu)
 ui.treeView.selectionModel().selectionChanged.connect(treeView_selectionChanged)
 ui.treeView.doubleClicked.connect(treeView_doubleClicked)
-ui.treeView.customContextMenuRequested.connect(showContextMenu)
 
+ui.treeView_2.customContextMenuRequested.connect(showContextMenu_2)
 ui.treeView_2.selectionModel().selectionChanged.connect(treeView_selectionChanged)
 ui.treeView_2.doubleClicked.connect(treeView_del_selection_row)
-ui.treeView_2.customContextMenuRequested.connect(showContextMenu_2)
 
 ui.pushButton.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(ui.label_5.text())))
 ui.pushButton_Update.clicked.connect(lambda: update_price(True))
 ui.pushButton_Clear.clicked.connect(lambda: clear_model(ui.treeView_2, ui.model_null))
+ui.pushButton_SaveViyar.clicked.connect(save_to_csv)
 
 ui.label_img.mouseDoubleClickEvent = lambda event: MyForm().viwe_img(pixmap_all, ui.horizontalScrollBar.value())
 
