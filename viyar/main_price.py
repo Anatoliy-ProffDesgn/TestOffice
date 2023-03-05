@@ -446,8 +446,8 @@ def save_to_csv():
                     kol = str(ui.model_null.data(ui.model_null.index(row, 4)))
                     values = [kod, kol]
                     writer.writerow(values)
-                    if row == 1:
-                        break
+                    # if row == 1:
+                    #     break
 
 
 # --------------------Підключення сигналів-------------------------------------------------------------

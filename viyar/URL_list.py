@@ -1,6 +1,7 @@
 # 'https://viyar.ua/excel_export/?id=2559&to_xls=Y&lang=ua',
 # 'https://viyar.ua/excel_export/?id=2530&to_xls=Y&lang=ua',
 url_list = ['https://viyar.ua/excel_export/?id=2562&to_xls=Y&lang=ua',
+            'https://viyar.ua/excel_export/?id=0&to_xls=Y&lang=ua',
             'https://viyar.ua/excel_export/?id=3277&to_xls=Y&lang=ua',
             'https://viyar.ua/excel_export/?id=2544&to_xls=Y&lang=ua',
             'https://viyar.ua/excel_export/?id=2561&to_xls=Y&lang=ua',

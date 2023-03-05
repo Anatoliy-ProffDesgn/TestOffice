@@ -8,6 +8,10 @@ def download_price(urls):
     for url in urls:
         i += 1
         print(i, 'із', len(urls), 'Очікуєм')
-        load_file_in_url(url, 'newPrice' + str(i) + '.html')
+        try:
+            load_file_in_url(url, 'newPrice' + str(i) + '.html')
+        except Exception:
+            print('Помилка завантаження URL:', url)
+            continue
         print('newPrice' + str(i) + '.xls', ' - Завантажено')
 

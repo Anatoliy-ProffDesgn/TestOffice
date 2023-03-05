@@ -1,4 +1,5 @@
 # створено спираючись на інструкцію із https://python-scripts.com/beautifulsoup-html-parsing
+import sys
 
 # import requests
 # from PyInstaller.isolated._parent import child
@@ -52,9 +53,13 @@ def full_price(dir_name):
     # item_load = 0
     price = []
     for file in files_list:
-        tmp_price = price_pars(file)
-        for p in tmp_price:
-            price.append(p)
+        try:
+            tmp_price = price_pars(file)
+        except Exception:
+            print(sys.exc_info()[1])
+        else:
+            for p in tmp_price:
+                price.append(p)
         # item_load += 1
     return price
 

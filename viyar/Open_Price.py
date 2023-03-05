@@ -1,4 +1,6 @@
 import json as js
+import os
+
 import AllFile_inDir as All_files
 
 
@@ -6,13 +8,26 @@ import AllFile_inDir as All_files
 def open_price(file_name=''):
     if file_name == '':
         file_name = All_files.get_file('./Price')
-        file_name = [str(file_name[len(file_name)-1])]
+        file = [new_file(file_name)]
     else:
-        file_name = [file_name]
-    with open(file_name[0], 'r', encoding='utf-8') as f:
+        file = [file_name]
+    with open(file[0], 'r', encoding='utf-8') as f:
         price = js.load(f)
-    return [price, file_name]
+    return [price, file]
 
+
+def new_file(files):
+    latest_file = None
+    latest_modification_time = 0
+
+    for file_path in files:
+        modification_time = os.path.getmtime(file_path)
+        if modification_time > latest_modification_time:
+            latest_file = file_path
+            latest_modification_time = modification_time
+
+    # print(latest_file)
+    return latest_file
 # ---------------test------------------
 # i = 0
 # j = 0
