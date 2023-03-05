@@ -1,6 +1,8 @@
 # url = 'https://viyar.ua/excel_export/?id=2522&to_xls=Y&lang=ua'
 # url = 'https://viyar.ua/excel_export/?id=2530&to_xls=Y&lang=ua'
 # url = 'https://files.viyar.ua/file/chertezhi/bel_viso/suave.pdf'
+import os
+
 url = 'https://viyar.ua/excel_export/?id=2521&to_xls=Y&lang=ua'
 
 from tqdm import tqdm
@@ -40,6 +42,8 @@ def FileUrl_Load(url, user_fileName=''):
     # индикатор выполнения отражает количество загруженных байт
     progress = tqdm(response.iter_content(buffer_size), f"Завантажується {filename}", total=file_size, unit="B",
                     unit_scale=True, unit_divisor=1024)
+    if not os.path.isdir('./temp/DownloadPrices/'):
+        os.makedirs('./temp/DownloadPrices/')
     with open('./temp/DownloadPrices/' + filename, "wb") as f:
         for data in progress.iterable:
             # запись данных прочитанных из файла

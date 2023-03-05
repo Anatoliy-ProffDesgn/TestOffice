@@ -1,6 +1,7 @@
 import random
 import sys
 import csv
+import os
 import requests
 from PyQt5.QtCore import QUrl, Qt
 from PyQt5.QtGui import QPixmap
@@ -350,6 +351,14 @@ def start():
     file_tmp = open_price()
     data = file_tmp[0]
     len_data = len(data)
+    # print(data)
+    categories = list(set([d['Category'] for d in data]))
+    categories.sort()
+    # Додаємо унікальні категорії у комбінований список
+    ui.comboBox.addItems(categories)
+
+    # Виводимо комбінований список на екран
+    ui.comboBox.show()
 
     # ui.treeView = MyTreeView()
     ui.treeView.setSortingEnabled(True)
@@ -421,15 +430,19 @@ def on_action_del_triggered():
 # --------------------------Save file-----------------------------------------------------------------
 def save_to_csv():
     # Відкрити діалогове вікно для вибору шляху до файлу
+    if not os.path.isdir('./temp/'):
+        os.makedirs('./temp/')
     if ui.treeView_2.model().rowCount() > 0:
         f_name = 'Замовлення фурнітури Віяр від ' + datetime.datetime.now().strftime('%d_%m_%Y')
         file_dialog = QtWidgets.QFileDialog(Form)
-        file_dialog.setDirectory('/temp/')
-        path, _ = file_dialog.getSaveFileName(Form, "Save File", f_name, "CSV Files (*.csv)")
+        temp_folder = os.path.abspath('./temp/')
+        file_dialog.setDirectory(temp_folder)
+        # path, _ = file_dialog.getSaveFileName(Form, "Save File", f_name, "CSV Files (*.csv)")
+        path, _ = file_dialog.getSaveFileName(Form, "Save File", os.path.join(temp_folder, f_name), "CSV Files (*.csv)")
 
         if path:
             # Відкрити файл для запису
-            with open('Shablon/viyar_form_furniture.csv', newline='') as csvfile:
+            with open('/Shablon/viyar_form_furniture.csv', newline='') as csvfile:
                 dialect = csv.Sniffer().sniff(csvfile.read(1024))
                 sep = str(dialect.delimiter)
                 print(sep)

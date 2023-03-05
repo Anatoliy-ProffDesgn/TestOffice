@@ -1,12 +1,16 @@
 import json as js
 import datetime as d
 import csv
+import os
+
 import LoadPrice_main as Load_price
 from Parse_html import full_price as f_price
 
 
 # ---------------Load (and/or) Update and save in json------------------
 def load_update(load_in_url=True, update_in_file=True, file_name=''):
+    if not os.path.isdir('./Price/'):
+        os.makedirs('./Price/')
     if file_name == "":
         date = d.date.today().strftime("%d_%m_%Y")
         price_file_name = './Price/Віяр фурнітура прайс ' + date + '.json'
