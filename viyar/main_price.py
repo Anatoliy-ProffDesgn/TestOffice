@@ -155,6 +155,18 @@ def clear_model(me_treeview, me_model):
     me_treeview.setModel(me_model)
 
 
+# -----------------Метод для обробки clicked на елементі treeView-----------------------------------
+def treeView_selectionChanged(selected, deselected):
+    global art_old
+    index = selected.indexes()[0]
+    my_model = index.model()
+    row = index.row()
+    art = my_model.index(row, 0).data()  # отримуємо артикул
+    if art != art_old:
+        art_old = art
+        update_image(art)
+
+
 # -----------------функція пошуку по назві-----------------------------------------------------
 def find_in():
     global data
@@ -195,23 +207,11 @@ def find_in():
                              QtGui.QStandardItem(item['Category'])])
     # встановити нову модель у treeView
     ui.treeView.setModel(ui.model2)
-    ui.treeView.selectionModel().selectionChanged.connect(treeView_selectionChanged)
     row_count = ui.model2.rowCount()
     ui.label.setText(f"Кількість знайдених результатів: {row_count}")
     # вивести модель
     ui.treeView.show()
-
-
-# -----------------Метод для обробки clicked на елементі treeView-----------------------------------
-def treeView_selectionChanged(selected, deselected):
-    global art_old
-    index = selected.indexes()[0]
-    my_model = index.model()
-    row = index.row()
-    art = my_model.index(row, 0).data()  # отримуємо артикул
-    if art != art_old:
-        art_old = art
-        update_image(art)
+    ui.treeView.selectionModel().selectionChanged.connect(treeView_selectionChanged)
 
 
 # ----------------Метод для обробки подвійного doubleClicked на елементі treeView-----------------
@@ -374,7 +374,6 @@ def start():
     # ui.treeView = MyTreeView()
     ui.treeView.setSortingEnabled(True)
     interior(ui.model, ui.treeView)
-
     setData(data)
 
     r = str(ui.treeView.model().rowCount())
@@ -482,8 +481,8 @@ ui.comboBox.editTextChanged.connect(find_in)
 
 # ui.treeView.clicked.connect(treeView_clicked)
 ui.treeView.customContextMenuRequested.connect(showContextMenu)
-ui.treeView.selectionModel().selectionChanged.connect(treeView_selectionChanged)
 ui.treeView.doubleClicked.connect(treeView_doubleClicked)
+ui.treeView.selectionModel().selectionChanged.connect(treeView_selectionChanged)
 
 ui.treeView_2.customContextMenuRequested.connect(showContextMenu_2)
 ui.treeView_2.selectionModel().selectionChanged.connect(treeView_selectionChanged)
@@ -501,6 +500,7 @@ header.sectionClicked.connect(handleHeaderClick)
 
 if __name__ == "__main__":
     start()
+    ui.treeView.selectionModel().selectionChanged.connect(treeView_selectionChanged)
 
 Form.show()
 update_image(art_0)
