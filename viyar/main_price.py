@@ -158,21 +158,31 @@ def clear_model(me_treeview, me_model):
 # -----------------функція пошуку по назві-----------------------------------------------------
 def find_in():
     global data
+
     txt = ui.lineEdit_SearchArt.text()
     if len(txt) > 0:
-        data_0 = find_txt_in_price(txt, data, 'Article')
+        data_0 = find_txt_in_price(txt.lower(), data, 'Article')
     else:
         data_0 = data
-    txt = ui.lineEdit_SearchName.text()
+
+    txt = ui.comboBox.currentText()
     if len(txt) > 0:
-        data_1 = find_txt_in_price(txt, data_0, 'Name')
+        data_1 = find_txt_in_price(txt.lower(), data_0, 'Category')
     else:
         data_1 = data_0
-    txt = ui.lineEdit_SearchCategori.text()
+
+    # txt = ui.lineEdit_SearchCategori.text()
+    # if len(txt) > 0:
+    #     data_1 = find_txt_in_price(txt.lower(), data_00, 'Category')
+    # else:
+    #     data_1 = data_00
+
+    txt = ui.lineEdit_SearchName.text()
     if len(txt) > 0:
-        data_2 = find_txt_in_price(txt, data_1, 'Category')
+        data_2 = find_txt_in_price(txt.lower(), data_1, 'Name')
     else:
         data_2 = data_1
+
     # print(len(data_2),len_data)
     # if len(data_2) != len_data or len(txt) != 0:
     ui.model2 = QStandardItemModel()
@@ -359,6 +369,7 @@ def start():
 
     # Виводимо комбінований список на екран
     ui.comboBox.show()
+    ui.comboBox.setCurrentIndex(-1)
 
     # ui.treeView = MyTreeView()
     ui.treeView.setSortingEnabled(True)
@@ -465,8 +476,9 @@ def save_to_csv():
 
 # --------------------Підключення сигналів-------------------------------------------------------------
 ui.lineEdit_SearchName.textChanged.connect(find_in)
-ui.lineEdit_SearchCategori.textChanged.connect(find_in)
+# ui.lineEdit_SearchCategori.textChanged.connect(find_in)
 ui.lineEdit_SearchArt.textChanged.connect(find_in)
+ui.comboBox.editTextChanged.connect(find_in)
 
 # ui.treeView.clicked.connect(treeView_clicked)
 ui.treeView.customContextMenuRequested.connect(showContextMenu)
