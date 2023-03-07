@@ -18,7 +18,7 @@ from main_Full_Updete_Price import *
 from PyQt5.QtWidgets import QApplication, QSplashScreen, QLabel
 from PyQt5.QtGui import QPixmap
 import time
-
+print('hello')
 # Створення Splash Screen
 app_w = QApplication([])
 splash = QSplashScreen(QPixmap("./Shablon/start.png"))
