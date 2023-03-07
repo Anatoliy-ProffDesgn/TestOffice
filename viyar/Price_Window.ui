@@ -64,7 +64,7 @@
     <item row="0" column="0">
      <layout class="QVBoxLayout" name="verticalLayout" stretch="10,100,5">
       <item>
-       <layout class="QGridLayout" name="gridLayout_2" columnstretch="1,3,2">
+       <layout class="QGridLayout" name="gridLayout_2" columnstretch="1,5,1,1,3">
         <property name="leftMargin">
          <number>3</number>
         </property>
@@ -86,7 +86,7 @@
         <item row="0" column="0">
          <widget class="QLabel" name="label_4">
           <property name="text">
-           <string>Пошук за артикулом</string>
+           <string>Артикул</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
@@ -109,7 +109,7 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="2">
+        <item row="0" column="4">
          <widget class="QLabel" name="label_2">
           <property name="text">
            <string>Пошук за категорією</string>
@@ -119,10 +119,44 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="2">
+        <item row="1" column="4">
          <widget class="QComboBox" name="comboBox">
           <property name="editable">
            <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QLineEdit" name="lineEdit_max">
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QLineEdit" name="lineEdit_min">
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLabel" name="label_6">
+          <property name="text">
+           <string>Ціна від</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QLabel" name="label_7">
+          <property name="text">
+           <string>до</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </item>

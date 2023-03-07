@@ -1,4 +1,5 @@
 import random
+import re
 import sys
 import csv
 import os
@@ -6,7 +7,7 @@ import requests
 from PyQt5.QtCore import QUrl, Qt
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtGui import QStandardItemModel, QDesktopServices
-from PyQt5.QtWidgets import QInputDialog, QFileDialog
+from PyQt5.QtWidgets import QInputDialog, QFileDialog, QProgressDialog
 import datetime
 
 import img_viwer
@@ -14,16 +15,27 @@ from Open_Price import open_price
 from Price_Window import *
 from Search_txt_in_price import find_txt_in_price
 from main_Full_Updete_Price import *
+from PyQt5.QtWidgets import QApplication, QSplashScreen, QLabel
+from PyQt5.QtGui import QPixmap
+import time
 
+# Створення Splash Screen
+app_w = QApplication([])
+splash = QSplashScreen(QPixmap("./Shablon/start.png"))
+splash.show()
 
-# class MyTreeView(QTreeView):
-#     def __init__(self):
-#         super().__init__()
+# # Створення QProgressDialog
+# progress_dialog = QProgressDialog("Loading...", "Cancel", 0, 100, splash)
+# progress_dialog.setWindowTitle("Loading...")
+# progress_dialog.setWindowModality(Qt.WindowModal)
+# progress_dialog.setCancelButton(None)
+# progress_dialog.setAutoClose(True)
 #
-#     def keyPressEvent(self, event):
-#         if event.type() == event.KeyPress:
-#             print(f"Натиснута клавіша {event.key()} ({Qt.Key(event.key())})")
-#         super().keyPressEvent(event)
+# # Показ QProgressDialog та завантаження ресурсів та ініціалізація програми
+# for i in range(101):
+#     progress_dialog.setValue(i)
+#     app_w.processEvents()
+#     time.sleep(0.01) # Реалістично затримка завантаження
 
 
 class MyForm(QtWidgets.QWidget):
@@ -40,7 +52,7 @@ class MyForm(QtWidgets.QWidget):
         index = 0 if index > len(pixmap_all) else index
         global indx
         indx = index
-        pixmap = QPixmap(pixmap_all[index])  # ui.horizontalScrollBar.value()
+        pixmap = QPixmap(pixmap_all[index])
         img_viwer.Form_viwer = QtWidgets.QWidget()
         ui_viwer = img_viwer.Ui_Form_viwer()
         ui_viwer.setupUi(img_viwer.Form_viwer)
@@ -48,13 +60,11 @@ class MyForm(QtWidgets.QWidget):
         img_viwer.Form_viwer.show()
         app.exec_()
 
-    def keyPressEvent(self, event):  # , row_data_list, treeview_obj):
-        if event.key() == QtCore.Qt.Key_Space:
-            # Викликати вашу функцію
-            # add_row_to_treeview(row_data_list, treeview_obj)
-            print(event.key)
-        else:
-            super().keyPressEvent(event)
+    # def keyPressEvent(self, event):
+    #     if not event.key() == QtCore.Qt.Key_Space:
+    #         # Викликати вашу функцію
+    #         # print(event.key)
+    #         super().keyPressEvent(event)
 
 
 ua = [
@@ -129,8 +139,8 @@ def interior(me_model, obj_view):
 
 # -----------Заповнюємо модель даних елементами з масиву------------------------------------------------------
 def setData(data_rez):
+    # print(data_rez)
     clear_model(ui.treeView, ui.model)
-    # interior(ui.model, ui.treeView)
     ui.model.invisibleRootItem().clearData()
     for item in data_rez:
         root = ui.model.invisibleRootItem()
@@ -139,9 +149,7 @@ def setData(data_rez):
                         QtGui.QStandardItem(item['Price']),
                         QtGui.QStandardItem(item['Unit']),
                         QtGui.QStandardItem(item['Category'])])
-    # print(ui.model.rowCount())
     ui.treeView.setModel(ui.model)
-    # ui.treeView.setSortingEnabled(True)
     ui.retranslateUi(Form)
     QtCore.QMetaObject.connectSlotsByName(Form)
     me_sort_mod(ui.model_null, ui.treeView_2)
@@ -170,48 +178,52 @@ def treeView_selectionChanged(selected, deselected):
 # -----------------функція пошуку по назві-----------------------------------------------------
 def find_in():
     global data
+    header = ui.treeView.header()
+    column = header.sortIndicatorSection()
+    order = header.sortIndicatorOrder()
+    ui.treeView.setSortingEnabled(False)
+    min_price = float(ui.lineEdit_min.text()) if ui.lineEdit_min.text() else 0
+    max_price = float(ui.lineEdit_max.text()) if ui.lineEdit_max.text() != '0' else float(10 ** 22)
+
+    data_price = list(filter(lambda x: min_price <= float(x['Price']) <= max_price, data))
 
     txt = ui.lineEdit_SearchArt.text()
-    if len(txt) > 0:
-        data_0 = find_txt_in_price(txt.lower(), data, 'Article')
+    if len(txt) > 1:
+        data_art = find_txt_in_price(txt.lower(), data_price, 'Article')
     else:
-        data_0 = data
+        data_art = data_price
 
     txt = ui.comboBox.currentText()
-    if len(txt) > 0:
-        data_1 = find_txt_in_price(txt.lower(), data_0, 'Category')
+    if len(txt) > 1:
+        data_category = find_txt_in_price(txt.lower(), data_art, 'Category')
     else:
-        data_1 = data_0
-
-    # txt = ui.lineEdit_SearchCategori.text()
-    # if len(txt) > 0:
-    #     data_1 = find_txt_in_price(txt.lower(), data_00, 'Category')
-    # else:
-    #     data_1 = data_00
+        data_category = data_art
 
     txt = ui.lineEdit_SearchName.text()
-    if len(txt) > 0:
-        data_2 = find_txt_in_price(txt.lower(), data_1, 'Name')
+    if len(txt) > 1:
+        data_name = find_txt_in_price(txt.lower(), data_category, 'Name')
     else:
-        data_2 = data_1
+        data_name = data_category
+    if not len(data_name) == ui.treeView.model().rowCount():
+        ui.model2 = QStandardItemModel()
+        interior(ui.model2, ui.treeView)
+        for item in data_name:
+            ui.model2.appendRow([QtGui.QStandardItem(item['Article']),
+                                 QtGui.QStandardItem(item['Name']),
+                                 QtGui.QStandardItem(item['Price']),
+                                 QtGui.QStandardItem(item['Unit']),
+                                 QtGui.QStandardItem(item['Category'])])
+        # встановити нову модель у treeView
+        ui.treeView.setModel(ui.model2)
+        row_count = ui.model2.rowCount()
+        ui.label.setText(f"Кількість знайдених результатів: {row_count}")
+        # вивести модель
 
-    # print(len(data_2),len_data)
-    # if len(data_2) != len_data or len(txt) != 0:
-    ui.model2 = QStandardItemModel()
-    interior(ui.model2, ui.treeView)
-    for item in data_2:
-        ui.model2.appendRow([QtGui.QStandardItem(item['Article']),
-                             QtGui.QStandardItem(item['Name']),
-                             QtGui.QStandardItem(item['Price']),
-                             QtGui.QStandardItem(item['Unit']),
-                             QtGui.QStandardItem(item['Category'])])
-    # встановити нову модель у treeView
-    ui.treeView.setModel(ui.model2)
-    row_count = ui.model2.rowCount()
-    ui.label.setText(f"Кількість знайдених результатів: {row_count}")
-    # вивести модель
-    ui.treeView.show()
-    ui.treeView.selectionModel().selectionChanged.connect(treeView_selectionChanged)
+        me_sort_mod(ui.treeView.model(), ui.treeView)
+        ui.treeView.show()
+        ui.treeView.setSortingEnabled(True)
+        ui.treeView.sortByColumn(column, order)
+        ui.treeView.selectionModel().selectionChanged.connect(treeView_selectionChanged)
 
 
 # ----------------Метод для обробки подвійного doubleClicked на елементі treeView-----------------
@@ -223,7 +235,7 @@ def treeView_doubleClicked(index):
     """
     # Отримати дані виділеного рядка treeView1
     row_data = [my_model.data(my_model.index(index.row(), column)) for column in range(my_model.columnCount())]
-    print(row_data)
+    # print(row_data)
     count_me_dialog, ok_pressed = QInputDialog.getInt(QtWidgets.QWidget(), "Кількість", "Введіть кількість:", value=1)
     if ok_pressed:
         row_data[len(row_data) - 1] = count_me_dialog
@@ -251,10 +263,16 @@ def handleHeaderClick(index):
 
 
 def load_image(url):
-    response = requests.get(url, headers={'User-Agent': random.choice(ua)})
     pixmap = QPixmap()
-    pixmap.loadFromData(response.content)
-    return pixmap
+    try:
+        response = requests.get(url, headers={'User-Agent': random.choice(ua)})
+        pixmap.loadFromData(response.content)
+        return pixmap
+    except:
+        # with open('Shablon/img_not.jpg', "rb") as f:
+        #     not_img_file = f.read()
+        #     pixmap_not.loadFromData(not_img_file)
+        return pixmap
 
 
 def load_first_image(art):
@@ -275,15 +293,12 @@ def count_image(art):
     index = 0
     global pixmap_all
     pixmap_all = []
-    # print('--> count_image')
     while not pixmap.isNull():
         pixmap_all.append(pixmap)
         index += 1
         n = str('_' + str(index + 1))
         next_url = url_s[0] + art + n + url_s[1]
         pixmap = load_image(next_url)
-        # print(index, not pixmap.isNull(), next_url)
-    # print('count_image -->')
     return index - 1
 
 
@@ -433,7 +448,6 @@ def on_action_kol_triggered():
 
 
 def on_action_del_triggered():
-    # print("Action 4 triggered")
     treeView_del_selection_row(ui.treeView_2.currentIndex())
 
 
@@ -447,7 +461,6 @@ def save_to_csv():
         file_dialog = QtWidgets.QFileDialog(Form)
         temp_folder = os.path.abspath('./temp/')
         file_dialog.setDirectory(temp_folder)
-        # path, _ = file_dialog.getSaveFileName(Form, "Save File", f_name, "CSV Files (*.csv)")
         path, _ = file_dialog.getSaveFileName(Form, "Save File", os.path.join(temp_folder, f_name), "CSV Files (*.csv)")
 
         if path:
@@ -455,7 +468,6 @@ def save_to_csv():
             with open('/Shablon/viyar_form_furniture.csv', newline='') as csvfile:
                 dialect = csv.Sniffer().sniff(csvfile.read(1024))
                 sep = str(dialect.delimiter)
-                print(sep)
             with open(path, "w", newline="") as f:
                 writer = csv.writer(f, delimiter=sep)
 
@@ -469,20 +481,34 @@ def save_to_csv():
                     kol = str(ui.model_null.data(ui.model_null.index(row, 4)))
                     values = [kod, kol]
                     writer.writerow(values)
-                    # if row == 1:
-                    #     break
+
+
+def selectAllOnFocus(me_line_edit):
+    me_line_edit.selectAll()
+    # print(me_line_edit.objectName())
+
+
+def to_int(me_line_edit):
+    try:
+        txt = me_line_edit.text()
+        me_line_edit.setText(str(int(re.sub("[^0-9]", "", txt))))
+    except:
+        me_line_edit.setText('0')
+    else:
+        find_in()
 
 
 # --------------------Підключення сигналів-------------------------------------------------------------
 ui.lineEdit_SearchName.textChanged.connect(find_in)
-# ui.lineEdit_SearchCategori.textChanged.connect(find_in)
 ui.lineEdit_SearchArt.textChanged.connect(find_in)
+ui.lineEdit_min.textChanged.connect(lambda: to_int(ui.lineEdit_min))
+ui.lineEdit_max.textChanged.connect(lambda: to_int(ui.lineEdit_max))
 ui.comboBox.editTextChanged.connect(find_in)
 
-# ui.treeView.clicked.connect(treeView_clicked)
 ui.treeView.customContextMenuRequested.connect(showContextMenu)
 ui.treeView.doubleClicked.connect(treeView_doubleClicked)
 ui.treeView.selectionModel().selectionChanged.connect(treeView_selectionChanged)
+ui.treeView.header().clicked.connect(lambda: me_sort_mod(ui.treeView.model(), ui.treeView))
 
 ui.treeView_2.customContextMenuRequested.connect(showContextMenu_2)
 ui.treeView_2.selectionModel().selectionChanged.connect(treeView_selectionChanged)
@@ -501,7 +527,10 @@ header.sectionClicked.connect(handleHeaderClick)
 if __name__ == "__main__":
     start()
     ui.treeView.selectionModel().selectionChanged.connect(treeView_selectionChanged)
-
+# Закриття Splash Screen
+splash.close()
+# progress_dialog.close()
+# Показ головного вікна програми
 Form.show()
 update_image(art_0)
 ui.horizontalScrollBar.valueChanged.connect(slider_change)
