@@ -18,10 +18,12 @@ from main_Full_Updete_Price import *
 from PyQt5.QtWidgets import QApplication, QSplashScreen, QLabel
 from PyQt5.QtGui import QPixmap
 import time
-print('hello')
+
 # Створення Splash Screen
 app_w = QApplication([])
-splash = QSplashScreen(QPixmap("./Shablon/start.png"))
+
+
+splash = QSplashScreen(QPixmap('Shablon/start.png'))
 splash.show()
 
 # # Створення QProgressDialog
@@ -465,7 +467,7 @@ def save_to_csv():
 
         if path:
             # Відкрити файл для запису
-            with open('/Shablon/viyar_form_furniture.csv', newline='') as csvfile:
+            with open('Shablon/viyar_form_furniture.csv', newline='') as csvfile:
                 dialect = csv.Sniffer().sniff(csvfile.read(1024))
                 sep = str(dialect.delimiter)
             with open(path, "w", newline="") as f:
@@ -481,6 +483,8 @@ def save_to_csv():
                     kol = str(ui.model_null.data(ui.model_null.index(row, 4)))
                     values = [kod, kol]
                     writer.writerow(values)
+                    if row == 1:
+                        break
 
 
 def selectAllOnFocus(me_line_edit):
