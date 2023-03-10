@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1205</width>
-    <height>804</height>
+    <width>1204</width>
+    <height>824</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -344,7 +344,7 @@
      </layout>
     </item>
     <item row="1" column="1">
-     <layout class="QGridLayout" name="gridLayout_3" rowstretch="0,0,5,5,5,5,5" columnstretch="3,2">
+     <layout class="QGridLayout" name="gridLayout_3" rowstretch="0,0,0,0,0,0,0" columnstretch="3,0">
       <property name="leftMargin">
        <number>3</number>
       </property>
@@ -357,13 +357,6 @@
       <property name="bottomMargin">
        <number>3</number>
       </property>
-      <item row="4" column="0">
-       <widget class="QPushButton" name="pushButton_Update">
-        <property name="text">
-         <string>Оновити прайси</string>
-        </property>
-       </widget>
-      </item>
       <item row="6" column="1">
        <widget class="QPushButton" name="pushButton_SaveViyar">
         <property name="font">
@@ -374,20 +367,6 @@
         </property>
         <property name="text">
          <string>Зберегти для Віяр</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QPushButton" name="pushButton_Clear">
-        <property name="text">
-         <string>Очистити обране</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QPushButton" name="pushButton_SaveCustom">
-        <property name="text">
-         <string> Зберегти обране як користувацький прайс </string>
         </property>
        </widget>
       </item>
@@ -415,6 +394,12 @@
          <property name="text">
           <string>Повний прайс</string>
          </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
+         </property>
         </widget>
         <widget class="QRadioButton" name="radioButton_Custom">
          <property name="geometry">
@@ -431,9 +416,46 @@
         </widget>
        </widget>
       </item>
+      <item row="2" column="0">
+       <widget class="QPushButton" name="pushButton_SaveCustom">
+        <property name="text">
+         <string> Зберегти обране як користувацький прайс </string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QPushButton" name="pushButton_Update">
+        <property name="text">
+         <string>Оновити прайси</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QPushButton" name="pushButton_Clear">
+        <property name="text">
+         <string>Очистити обране</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
    </layout>
+  </widget>
+  <widget class="QLabel" name="label_proc">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>803</y>
+     <width>1191</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::StyledPanel</enum>
+   </property>
+   <property name="text">
+    <string>TextLabel</string>
+   </property>
   </widget>
  </widget>
  <tabstops>

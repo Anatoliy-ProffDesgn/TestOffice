@@ -4,9 +4,9 @@ import re
 import sys
 
 import requests
-from PyQt5.QtCore import QUrl
+from PyQt5.QtCore import QUrl, Qt
 from PyQt5.QtGui import QStandardItemModel, QDesktopServices, QPixmap
-from PyQt5.QtWidgets import QInputDialog, QApplication, QSplashScreen, QMessageBox
+from PyQt5.QtWidgets import QInputDialog, QApplication, QSplashScreen, QMessageBox, QButtonGroup
 
 import img_viwer
 from Open_Price import open_price
@@ -19,10 +19,10 @@ import inet_test
 # Створення Splash Screen
 app_w = QApplication([])
 
-
 splash = QSplashScreen(QPixmap('Shablon/start.png'))
 splash.show()
 
+splash.showMessage("...", Qt.AlignBottom | Qt.AlignHCenter, Qt.white)
 # # Створення QProgressDialog
 # progress_dialog = QProgressDialog("Loading...", "Cancel", 0, 100, splash)
 # progress_dialog.setWindowTitle("Loading...")
@@ -80,7 +80,7 @@ art_old = ''
 global me_art
 global data
 url_s = ['https://viyar.ua/store/Items/photos/ph', '.jpg']
-
+splash.showMessage("Global data...", Qt.AlignBottom | Qt.AlignHCenter, Qt.white)
 
 class CustomSortModel(QtCore.QSortFilterProxyModel):
     def lessThan(self, left, right):
@@ -107,7 +107,10 @@ ui.treeView.setAlternatingRowColors(True)  # чергування кольру �
 ui.model_null = QtGui.QStandardItemModel()
 ui.treeView_2.setModel(ui.model_null)
 ui.treeView_2.setAlternatingRowColors(True)  # чергування кольру рядків
-
+button_group = QButtonGroup()
+button_group.addButton(ui.radioButton_Custom)
+button_group.addButton(ui.radioButton_All)
+splash.showMessage("Create object window...", Qt.AlignBottom | Qt.AlignHCenter, Qt.white)
 
 # -----------вмикаємо підтримку сортування--------------------------------------------------------------------
 def me_sort_mod(me_model, obj_view):
@@ -119,6 +122,10 @@ def me_sort_mod(me_model, obj_view):
 
 
 def interior(me_model, obj_view):
+    try:
+        splash.showMessage("Update interior...", Qt.AlignBottom | Qt.AlignHCenter, Qt.white)
+    except:
+        pass
     # -----------Встановлюємо заголовки стовпців---------------------------------------------------------------
     me_model.setHorizontalHeaderLabels(['Артикул', 'Назва виробу', 'Ціна', 'Одиниці', 'Категорія'])
     header = obj_view.header()
@@ -139,6 +146,10 @@ def interior(me_model, obj_view):
 # -----------Заповнюємо модель даних елементами з масиву------------------------------------------------------
 def setData(data_rez):
     # print(data_rez)
+    try:
+        splash.showMessage("Load data ...", Qt.AlignBottom | Qt.AlignHCenter, Qt.white)
+    except:
+        pass
     clear_model(ui.treeView, ui.model)
     ui.model.invisibleRootItem().clearData()
     for item in data_rez:
@@ -176,7 +187,8 @@ def treeView_selectionChanged(selected, deselected):
             art_old = art
             update_image(art)
     else:
-        ui.treeView.selectionModel().selectionChanged.connect(treeView_selectionChanged)
+        pass
+        # ui.treeView.selectionModel().selectionChanged.connect(treeView_selectionChanged)
     # except:
     #     pass
 
@@ -280,6 +292,7 @@ def load_image(url):
         #     pixmap_not.loadFromData(not_img_file)
         return pixmap
 
+
 def load_first_image(art):
     url = url_s[0] + art + url_s[1]
     global art_old
@@ -376,9 +389,14 @@ def showContextMenu(point):
     menu = QtWidgets.QMenu(ui.treeView)
     # додавання пункту меню
     action_add = menu.addAction('Додати до списку замовлення')
+    menu.addSeparator()
+    action_full_price = menu.addAction('Повний прайс')
+    action_custom_price = menu.addAction('Мій прайс')
     # action2 = menu.addAction('Action 2')
     # показ контекстного меню
     action_add.triggered.connect(on_action_add_triggered)
+    action_custom_price.triggered.connect(lambda: start('Custom/customPrice.json'))
+    action_full_price.triggered.connect(lambda: start())
     # action_add.triggered.connect(lambda: print('1'))
     # action2.triggered.connect(lambda: print('Action 2 triggered'))
     menu.exec_(ui.treeView.mapToGlobal(point))
@@ -469,7 +487,6 @@ def to_int(me_line_edit):
         find_in()
 
 
-
 def save_custom_price():
     msgBox = QMessageBox()
     msgBox.setIcon(QMessageBox.Information)
@@ -486,13 +503,16 @@ def save_custom_price():
     # Дерево порожнє
 
 
-
 global art_0
 global tmp
 global len_data
 
 
-def start(price_name = ''):
+def start(price_name=''):
+    try:
+        splash.showMessage("Started price...", Qt.AlignBottom | Qt.AlignHCenter, Qt.white)
+    except:
+        pass
     global art_0
     global tmp
     global data
@@ -550,23 +570,24 @@ def start(price_name = ''):
     ui.pushButton_SaveViyar.clicked.connect(save_to_csv)
     ui.pushButton_SaveCustom.clicked.connect(save_custom_price)
 
-    ui.radioButton_Custom.toggled.connect(lambda: start('Custom/customPrice.json'))
-    ui.radioButton_All.toggled.connect(lambda: start())
 
     ui.label_img.mouseDoubleClickEvent = lambda event: MyForm().viwe_img(pixmap_all, ui.horizontalScrollBar.value())
 
     header = ui.treeView.header()
     header.sectionClicked.connect(handleHeaderClick)
 
+    ui.horizontalScrollBar.valueChanged.connect(slider_change)
+
+
+ui.radioButton_Custom.toggled.connect(lambda: start('Custom/customPrice.json'))
+ui.radioButton_All.toggled.connect(lambda: start())
 if __name__ == "__main__":
     start()
     ui.treeView.selectionModel().selectionChanged.connect(treeView_selectionChanged)
 # Закриття Splash Screen
 splash.close()
-# progress_dialog.close()
+
 # Показ головного вікна програми
 Form.show()
-# update_image(art_0)
-ui.horizontalScrollBar.valueChanged.connect(slider_change)
 
 sys.exit(app.exec_())
