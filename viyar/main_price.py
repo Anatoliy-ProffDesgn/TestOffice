@@ -382,6 +382,7 @@ def start(price_name = ''):
     categories = list(set([d['Category'] for d in data]))
     categories.sort()
     # Додаємо унікальні категорії у комбінований список
+    ui.comboBox.clear()
     ui.comboBox.addItems(categories)
 
     # Виводимо комбінований список на екран
@@ -517,11 +518,15 @@ def save_custom_price():
     # Дерево порожнє
 
 # --------------------Підключення сигналів-------------------------------------------------------------
-ui.lineEdit_SearchName.textChanged.connect(find_in)
-ui.lineEdit_SearchArt.textChanged.connect(find_in)
-ui.lineEdit_min.textChanged.connect(lambda: to_int(ui.lineEdit_min))
-ui.lineEdit_max.textChanged.connect(lambda: to_int(ui.lineEdit_max))
+# ui.lineEdit_SearchName.textChanged.connect(find_in)
+# ui.lineEdit_SearchArt.textChanged.connect(find_in)
+# ui.lineEdit_min.textChanged.connect(lambda: to_int(ui.lineEdit_min))
+# ui.lineEdit_max.textChanged.connect(lambda: to_int(ui.lineEdit_max))
 ui.comboBox.editTextChanged.connect(find_in)
+ui.lineEdit_SearchName.editingFinished.connect(find_in)
+ui.lineEdit_SearchArt.editingFinished.connect(find_in)
+ui.lineEdit_min.editingFinished.connect(lambda: to_int(ui.lineEdit_min))
+ui.lineEdit_max.editingFinished.connect(lambda: to_int(ui.lineEdit_max))
 
 ui.treeView.customContextMenuRequested.connect(showContextMenu)
 ui.treeView.doubleClicked.connect(treeView_doubleClicked)
