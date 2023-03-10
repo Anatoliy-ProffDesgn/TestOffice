@@ -1,23 +1,18 @@
+import datetime
 import random
 import re
 import sys
-import csv
-import os
+
 import requests
-from PyQt5.QtCore import QUrl, Qt
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtGui import QStandardItemModel, QDesktopServices
-from PyQt5.QtWidgets import QInputDialog, QFileDialog, QProgressDialog
-import datetime
+from PyQt5.QtCore import QUrl
+from PyQt5.QtGui import QStandardItemModel, QDesktopServices, QPixmap
+from PyQt5.QtWidgets import QInputDialog, QApplication, QSplashScreen
 
 import img_viwer
 from Open_Price import open_price
 from Price_Window import *
 from Search_txt_in_price import find_txt_in_price
 from main_Full_Updete_Price import *
-from PyQt5.QtWidgets import QApplication, QSplashScreen, QLabel
-from PyQt5.QtGui import QPixmap
-import time
 
 # Створення Splash Screen
 app_w = QApplication([])
@@ -276,7 +271,7 @@ def load_image(url):
         #     pixmap_not.loadFromData(not_img_file)
         return pixmap
 
-
+import inet_test
 def load_first_image(art):
     url = url_s[0] + art + url_s[1]
     global art_old
@@ -305,25 +300,28 @@ def count_image(art):
 
 
 def get_image(label, pixmap):
-    # Отримати оригінальний розмір зображення
-    original_width = pixmap.width()
-    original_height = pixmap.height()
-    global label_width
-    global label_height
-    # Отримати розміри label
-    if label_width == 0 or label_height == 0:
-        label_width = label.width()
-        label_height = label.height()
+    if inet_test.is_internet_available():
+        # Отримати оригінальний розмір зображення
+        original_width = pixmap.width()
+        original_height = pixmap.height()
+        global label_width
+        global label_height
+        # Отримати розміри label
+        if label_width == 0 or label_height == 0:
+            label_width = label.width()
+            label_height = label.height()
 
-    # Обчислити нові розміри зображення зберігаючи пропорцію
-    if original_width > label_width or original_height > label_height:
-        width_ratio = label_width / original_width
-        height_ratio = label_height / original_height
-        ratio = min(width_ratio, height_ratio)
-        new_width = int(original_width * ratio)
-        new_height = int(original_height * ratio)
-        pixmap = pixmap.scaled(new_width, new_height, QtCore.Qt.KeepAspectRatio)
-    label.setPixmap(pixmap)
+        # Обчислити нові розміри зображення зберігаючи пропорцію
+        if original_width > label_width or original_height > label_height:
+            width_ratio = label_width / original_width
+            height_ratio = label_height / original_height
+            ratio = min(width_ratio, height_ratio)
+            new_width = int(original_width * ratio)
+            new_height = int(original_height * ratio)
+            pixmap = pixmap.scaled(new_width, new_height, QtCore.Qt.KeepAspectRatio)
+        label.setPixmap(pixmap)
+    else:
+        label.setText('Перевірте підключення до мережі інтернет')
 
 
 def update_image(art):
@@ -467,7 +465,7 @@ def save_to_csv():
 
         if path:
             # Відкрити файл для запису
-            with open('Shablon/viyar_form_furniture.csv', newline='') as csvfile:
+            with open('/Shablon/viyar_form_furniture.csv', newline='') as csvfile:
                 dialect = csv.Sniffer().sniff(csvfile.read(1024))
                 sep = str(dialect.delimiter)
             with open(path, "w", newline="") as f:
@@ -483,8 +481,6 @@ def save_to_csv():
                     kol = str(ui.model_null.data(ui.model_null.index(row, 4)))
                     values = [kod, kol]
                     writer.writerow(values)
-                    if row == 1:
-                        break
 
 
 def selectAllOnFocus(me_line_edit):
@@ -536,7 +532,7 @@ splash.close()
 # progress_dialog.close()
 # Показ головного вікна програми
 Form.show()
-update_image(art_0)
+# update_image(art_0)
 ui.horizontalScrollBar.valueChanged.connect(slider_change)
 
 sys.exit(app.exec_())
