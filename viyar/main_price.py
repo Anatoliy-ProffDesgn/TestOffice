@@ -6,13 +6,15 @@ import sys
 import requests
 from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QStandardItemModel, QDesktopServices, QPixmap
-from PyQt5.QtWidgets import QInputDialog, QApplication, QSplashScreen
+from PyQt5.QtWidgets import QInputDialog, QApplication, QSplashScreen, QMessageBox
 
 import img_viwer
 from Open_Price import open_price
 from Price_Window import *
 from Search_txt_in_price import find_txt_in_price
 from main_Full_Updete_Price import *
+import CustomPrice
+import inet_test
 
 # Створення Splash Screen
 app_w = QApplication([])
@@ -271,7 +273,6 @@ def load_image(url):
         #     pixmap_not.loadFromData(not_img_file)
         return pixmap
 
-import inet_test
 def load_first_image(art):
     url = url_s[0] + art + url_s[1]
     global art_old
@@ -367,14 +368,15 @@ global tmp
 global len_data
 
 
-def start():
+def start(price_name = ''):
     global art_0
     global tmp
     global data
     global len_data
     tmp = []
-    file_tmp = open_price()
+    file_tmp = open_price(price_name)
     data = file_tmp[0]
+    # print(data)
     len_data = len(data)
     # print(data)
     categories = list(set([d['Category'] for d in data]))
@@ -498,6 +500,22 @@ def to_int(me_line_edit):
         find_in()
 
 
+
+def save_custom_price():
+    msgBox = QMessageBox()
+    msgBox.setIcon(QMessageBox.Information)
+    msgBox.setWindowTitle("Збереження файлу")
+    # Ваш код для збереження файлу
+    if CustomPrice.create_and_save(data, ui.treeView_2):
+        # Показ повідомлення про збереження файлу
+        msgBox.setText("Файл збережено")
+    else:
+        msgBox.setText("Щось пішло не за планом.\n" + 'Не владолось зберегти файл.')
+    msgBox.setStandardButtons(QMessageBox.Ok)
+    msgBox.exec_()
+
+    # Дерево порожнє
+
 # --------------------Підключення сигналів-------------------------------------------------------------
 ui.lineEdit_SearchName.textChanged.connect(find_in)
 ui.lineEdit_SearchArt.textChanged.connect(find_in)
@@ -518,6 +536,10 @@ ui.pushButton.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(ui.label_5.t
 ui.pushButton_Update.clicked.connect(lambda: update_price(True))
 ui.pushButton_Clear.clicked.connect(lambda: clear_model(ui.treeView_2, ui.model_null))
 ui.pushButton_SaveViyar.clicked.connect(save_to_csv)
+ui.pushButton_SaveCustom.clicked.connect(save_custom_price)
+
+ui.radioButton_Custom.toggled.connect(lambda: start('Custom/customPrice.json'))
+ui.radioButton_All.toggled.connect(lambda: start())
 
 ui.label_img.mouseDoubleClickEvent = lambda event: MyForm().viwe_img(pixmap_all, ui.horizontalScrollBar.value())
 
