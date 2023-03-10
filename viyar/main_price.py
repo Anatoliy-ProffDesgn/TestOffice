@@ -165,13 +165,20 @@ def clear_model(me_treeview, me_model):
 # -----------------Метод для обробки clicked на елементі treeView-----------------------------------
 def treeView_selectionChanged(selected, deselected):
     global art_old
-    index = selected.indexes()[0]
-    my_model = index.model()
-    row = index.row()
-    art = my_model.index(row, 0).data()  # отримуємо артикул
-    if art != art_old:
-        art_old = art
-        update_image(art)
+    # try:
+    indexes = selected.indexes()
+    if indexes:
+        index = indexes[0]
+        my_model = index.model()
+        row = index.row()
+        art = my_model.index(row, 0).data()  # отримуємо артикул
+        if art != art_old:
+            art_old = art
+            update_image(art)
+    else:
+        ui.treeView.selectionModel().selectionChanged.connect(treeView_selectionChanged)
+    # except:
+    #     pass
 
 
 # -----------------функція пошуку по назві-----------------------------------------------------
@@ -363,45 +370,6 @@ def update_price(updt=False):
         start()
 
 
-global art_0
-global tmp
-global len_data
-
-
-def start(price_name = ''):
-    global art_0
-    global tmp
-    global data
-    global len_data
-    tmp = []
-    file_tmp = open_price(price_name)
-    data = file_tmp[0]
-    # print(data)
-    len_data = len(data)
-    # print(data)
-    categories = list(set([d['Category'] for d in data]))
-    categories.sort()
-    # Додаємо унікальні категорії у комбінований список
-    ui.comboBox.clear()
-    ui.comboBox.addItems(categories)
-
-    # Виводимо комбінований список на екран
-    ui.comboBox.show()
-    ui.comboBox.setCurrentIndex(-1)
-
-    # ui.treeView = MyTreeView()
-    ui.treeView.setSortingEnabled(True)
-    interior(ui.model, ui.treeView)
-    setData(data)
-
-    r = str(ui.treeView.model().rowCount())
-    nm_prise = str(file_tmp[1]).split('.')[-2].split('/')[-1]
-
-    ui.label_PriceDataName.setText(nm_prise)
-    ui.label.setText('Кількість знайдених результатів: ' + r)
-    art_0 = ui.treeView.model().index(0, 0).data()
-
-
 # ------------------conext menu-------------------------------------------------
 # ------------------------------------------------------------------------------
 def showContextMenu(point):
@@ -517,39 +485,78 @@ def save_custom_price():
 
     # Дерево порожнє
 
-# --------------------Підключення сигналів-------------------------------------------------------------
-# ui.lineEdit_SearchName.textChanged.connect(find_in)
-# ui.lineEdit_SearchArt.textChanged.connect(find_in)
-# ui.lineEdit_min.textChanged.connect(lambda: to_int(ui.lineEdit_min))
-# ui.lineEdit_max.textChanged.connect(lambda: to_int(ui.lineEdit_max))
-ui.comboBox.editTextChanged.connect(find_in)
-ui.lineEdit_SearchName.editingFinished.connect(find_in)
-ui.lineEdit_SearchArt.editingFinished.connect(find_in)
-ui.lineEdit_min.editingFinished.connect(lambda: to_int(ui.lineEdit_min))
-ui.lineEdit_max.editingFinished.connect(lambda: to_int(ui.lineEdit_max))
 
-ui.treeView.customContextMenuRequested.connect(showContextMenu)
-ui.treeView.doubleClicked.connect(treeView_doubleClicked)
-ui.treeView.selectionModel().selectionChanged.connect(treeView_selectionChanged)
-ui.treeView.header().clicked.connect(lambda: me_sort_mod(ui.treeView.model(), ui.treeView))
 
-ui.treeView_2.customContextMenuRequested.connect(showContextMenu_2)
-ui.treeView_2.selectionModel().selectionChanged.connect(treeView_selectionChanged)
-ui.treeView_2.doubleClicked.connect(treeView_del_selection_row)
+global art_0
+global tmp
+global len_data
 
-ui.pushButton.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(ui.label_5.text())))
-ui.pushButton_Update.clicked.connect(lambda: update_price(True))
-ui.pushButton_Clear.clicked.connect(lambda: clear_model(ui.treeView_2, ui.model_null))
-ui.pushButton_SaveViyar.clicked.connect(save_to_csv)
-ui.pushButton_SaveCustom.clicked.connect(save_custom_price)
 
-ui.radioButton_Custom.toggled.connect(lambda: start('Custom/customPrice.json'))
-ui.radioButton_All.toggled.connect(lambda: start())
+def start(price_name = ''):
+    global art_0
+    global tmp
+    global data
+    global len_data
+    tmp = []
+    file_tmp = open_price(price_name)
+    data = file_tmp[0]
+    # print(data)
+    len_data = len(data)
+    # print(data)
+    categories = list(set([d['Category'] for d in data]))
+    categories.sort()
+    # Додаємо унікальні категорії у комбінований список
+    ui.comboBox.clear()
+    ui.comboBox.addItems(categories)
 
-ui.label_img.mouseDoubleClickEvent = lambda event: MyForm().viwe_img(pixmap_all, ui.horizontalScrollBar.value())
+    # Виводимо комбінований список на екран
+    ui.comboBox.show()
+    ui.comboBox.setCurrentIndex(-1)
 
-header = ui.treeView.header()
-header.sectionClicked.connect(handleHeaderClick)
+    # ui.treeView = MyTreeView()
+    ui.treeView.setSortingEnabled(True)
+    interior(ui.model, ui.treeView)
+    setData(data)
+
+    r = str(ui.treeView.model().rowCount())
+    nm_prise = str(file_tmp[1]).split('.')[-2].split('/')[-1]
+
+    ui.label_PriceDataName.setText(nm_prise)
+    ui.label.setText('Кількість знайдених результатів: ' + r)
+    art_0 = ui.treeView.model().index(0, 0).data()
+    # --------------------Підключення сигналів-------------------------------------------------------------
+    # ui.lineEdit_SearchName.textChanged.connect(find_in)
+    # ui.lineEdit_SearchArt.textChanged.connect(find_in)
+    # ui.lineEdit_min.textChanged.connect(lambda: to_int(ui.lineEdit_min))
+    # ui.lineEdit_max.textChanged.connect(lambda: to_int(ui.lineEdit_max))
+    ui.comboBox.editTextChanged.connect(find_in)
+    ui.lineEdit_SearchName.editingFinished.connect(find_in)
+    ui.lineEdit_SearchArt.editingFinished.connect(find_in)
+    ui.lineEdit_min.editingFinished.connect(lambda: to_int(ui.lineEdit_min))
+    ui.lineEdit_max.editingFinished.connect(lambda: to_int(ui.lineEdit_max))
+
+    ui.treeView.customContextMenuRequested.connect(showContextMenu)
+    ui.treeView.doubleClicked.connect(treeView_doubleClicked)
+    ui.treeView.selectionModel().selectionChanged.connect(treeView_selectionChanged)
+    ui.treeView.header().clicked.connect(lambda: me_sort_mod(ui.treeView.model(), ui.treeView))
+
+    ui.treeView_2.customContextMenuRequested.connect(showContextMenu_2)
+    ui.treeView_2.selectionModel().selectionChanged.connect(treeView_selectionChanged)
+    ui.treeView_2.doubleClicked.connect(treeView_del_selection_row)
+
+    ui.pushButton.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(ui.label_5.text())))
+    ui.pushButton_Update.clicked.connect(lambda: update_price(True))
+    ui.pushButton_Clear.clicked.connect(lambda: clear_model(ui.treeView_2, ui.model_null))
+    ui.pushButton_SaveViyar.clicked.connect(save_to_csv)
+    ui.pushButton_SaveCustom.clicked.connect(save_custom_price)
+
+    ui.radioButton_Custom.toggled.connect(lambda: start('Custom/customPrice.json'))
+    ui.radioButton_All.toggled.connect(lambda: start())
+
+    ui.label_img.mouseDoubleClickEvent = lambda event: MyForm().viwe_img(pixmap_all, ui.horizontalScrollBar.value())
+
+    header = ui.treeView.header()
+    header.sectionClicked.connect(handleHeaderClick)
 
 if __name__ == "__main__":
     start()
