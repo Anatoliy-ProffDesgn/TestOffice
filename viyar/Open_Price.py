@@ -13,7 +13,14 @@ def open_price(file_name=''):
         file = [file_name]
     with open(file[0], 'r', encoding='utf-8') as f:
         price = js.load(f)
-    return [price, file]
+    prices = [price, file]
+    try:
+        with open('Custom/customPrice.json', 'r', encoding='utf-8') as f:
+            custom_price = js.load(f)
+            prices.append(custom_price)
+    except:
+        prices.append([])
+    return prices
 
 
 def new_file(files):
