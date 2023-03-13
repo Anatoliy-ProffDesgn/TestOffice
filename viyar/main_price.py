@@ -19,7 +19,7 @@ import inet_test
 # Створення Splash Screen
 app_w = QApplication([])
 
-splash = QSplashScreen(QPixmap('Shablon/start.png'))
+splash = QSplashScreen(QPixmap('images/start.png'))
 splash.show()
 
 splash.showMessage("...", Qt.AlignBottom | Qt.AlignHCenter, Qt.white)
@@ -353,7 +353,7 @@ def update_image(art):
     c = count_image(me_art)
     if c < 0:
         ui.horizontalScrollBar.setMaximum(0)
-        with open('Shablon/img_not.jpg', "rb") as f:
+        with open('images/img_not.jpg', "rb") as f:
             not_img_file = f.read()
             pixmap_not = QPixmap()
             pixmap_not.loadFromData(not_img_file)

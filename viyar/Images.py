@@ -15,6 +15,8 @@ ua = [
 ]
 url_s = ['https://viyar.ua/store/Items/photos/ph', '.jpg']
 
+global label_width
+global label_height
 
 def load_first_image(art):
     url = url_s[0] + art + url_s[1]
@@ -22,50 +24,61 @@ def load_first_image(art):
 
 
 def load_image(url):
+
     pixmap = QPixmap()
     try:
         response = requests.get(url, headers={'User-Agent': random.choice(ua)})
         pixmap.loadFromData(response.content)
         return pixmap
     except:
-        return pixmap
+        return QPixmap()
 
 
 def count_image(art):
-    pixmap = load_first_image(art)
-    index = 0
-    # global pixmap_all
     pixmap_all = []
-    while not pixmap.isNull():
+
+    if inet_test.is_internet_available():
+        pixmap = load_first_image(art)
+        index = 0
+        while not pixmap.isNull():
+            pixmap_all.append(pixmap)
+            index += 1
+            n = str('_' + str(index + 1))
+            next_url = url_s[0] + art + n + url_s[1]
+            pixmap = load_image(next_url)
+    if not pixmap_all:
+        # Load image from file
+        pixmap = QPixmap("images/img_not.jpg")
+
+        # Append pixmap to list
         pixmap_all.append(pixmap)
-        index += 1
-        n = str('_' + str(index + 1))
-        next_url = url_s[0] + art + n + url_s[1]
-        pixmap = load_image(next_url)
-    # pixmap_all.append(index - 1)
+
     return pixmap_all
 
 
 def get_image(label, pixmap):
-    if inet_test.is_internet_available():
-        # Отримати оригінальний розмір зображення
-        original_width = pixmap.width()
-        original_height = pixmap.height()
-        # global label_width
-        # global label_height
-        # Отримати розміри label
-        # if label_width == 0 or label_height == 0:
+    # Отримати оригінальний розмір зображення
+    original_width = pixmap.width()
+    original_height = pixmap.height()
+    global label_width
+    global label_height
+    # Отримати розміри label
+    try:
+        if not label_width or not label_height:
+            label_width = label.width()
+            label_height = label.height()
+    except:
         label_width = label.width()
         label_height = label.height()
 
-        # Обчислити нові розміри зображення зберігаючи пропорцію
-        if original_width > label_width or original_height > label_height:
-            width_ratio = label_width / original_width
-            height_ratio = label_height / original_height
-            ratio = min(width_ratio, height_ratio)
-            new_width = int(original_width * ratio)
-            new_height = int(original_height * ratio)
-            pixmap = pixmap.scaled(new_width, new_height, QtCore.Qt.KeepAspectRatio)
+    # Обчислити нові розміри зображення зберігаючи пропорцію
+    if original_width > label_width or original_height > label_height:
+        width_ratio = label_width / original_width
+        height_ratio = label_height / original_height
+        ratio = min(width_ratio, height_ratio)
+        new_width = int(original_width * ratio)
+        new_height = int(original_height * ratio)
+        pixmap = pixmap.scaled(new_width, new_height, QtCore.Qt.KeepAspectRatio)
         label.setPixmap(pixmap)
     else:
         label.setText('Перевірте підключення до мережі інтернет')

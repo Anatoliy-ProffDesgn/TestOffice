@@ -1,6 +1,8 @@
+from multiprocessing import Process
+
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import QStringListModel, QModelIndex
-from PyQt5.QtGui import QStandardItemModel, QStandardItem
+from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QMovie
 from PyQt5.QtWidgets import QHeaderView
 
 import inet_test
@@ -19,6 +21,7 @@ global custom_category
 global label_width
 global label_height
 global pixmaps
+
 
 class CustomSortModel(QtCore.QSortFilterProxyModel):
     def lessThan(self, left, right):
@@ -62,7 +65,6 @@ class MyWindow(QtWidgets.QWidget):
         # додатковий код для заповнення treeView
         # ...
 
-
         # -------------------Global-------------------------
         global full_model
         global custom_model
@@ -78,18 +80,28 @@ class MyWindow(QtWidgets.QWidget):
         self.treeView_set_model(self.ui.treeView, full_model)
         self.combo_box_set_data()
 
+
+    def update_image(self, art):
+        global pixmaps
+        pixmaps = img.count_image(art)
+        count = len(pixmaps)
+        img.get_image(self.ui.label_img, pixmaps[0])
+        self.ui.horizontalScrollBar.setMaximum(len(pixmaps) - 1)
+        self.ui.label_art.setText('Доступно ' + str(count) + ' зображень.')
+        self.ui.label_5.setText('https://viyar.ua/store/Items/photos/ph' + art + '.jpg')
+
     def on_tree_view_double_clicked(self, index: QModelIndex):
         print(f"Подвійний клік на елементі з індексом {index.row()}")
         art = self.ui.treeView.model().index(index.row(), 0).data()
-        global pixmaps
-        pixmaps = img.count_image(art)
-        img.get_image(self.ui.label_img, pixmaps[0])
-        self.ui.horizontalScrollBar.setMaximum(len(pixmaps))
+        self.update_image(art)
 
     def slider_move(self):
         global pixmaps
         try:
+            index = self.ui.horizontalScrollBar.value()
+            count = len(pixmaps)
             img.get_image(self.ui.label_img, pixmaps[self.ui.horizontalScrollBar.value()])
+            self.ui.label_art.setText(index + 1, 'із', count, 'зображень.')
         except:
             pass
 
@@ -154,8 +166,6 @@ class MyWindow(QtWidgets.QWidget):
         # Show the context menu at the cursor's position
         self.context_menu.exec_(self.ui.treeView.mapToGlobal(point))
 
-
-
     def full_price_triggered(self):
         # Handle Повний прайс
         self.treeView_set_model(self.ui.treeView, full_model)
@@ -167,7 +177,6 @@ class MyWindow(QtWidgets.QWidget):
         self.treeView_set_model(self.ui.treeView, custom_model)
         self.combo_box_set_data(custom_category)
         print("Action 2 triggered")
-
 
 
 # Create the application and show the main window
