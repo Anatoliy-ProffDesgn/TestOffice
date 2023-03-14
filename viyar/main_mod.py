@@ -1,14 +1,15 @@
 from multiprocessing import Process
 
-from PyQt5 import QtWidgets, QtGui, QtCore
-from PyQt5.QtCore import QStringListModel, QModelIndex
-from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QMovie
+from PyQt5 import QtWidgets, QtGui, QtCore, Qt
+from PyQt5.QtCore import QStringListModel, QModelIndex, QUrl
+from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QMovie, QDesktopServices
 from PyQt5.QtWidgets import QHeaderView
 
 import inet_test
 from Price_Window import Ui_Form
 from Open_Price import open_price
 import Images as img
+from Search_txt_in_price import find_txt_in_price
 
 # -------------------Global-------------------------
 global full_model
@@ -21,6 +22,7 @@ global custom_category
 global label_width
 global label_height
 global pixmaps
+global datas
 
 
 class CustomSortModel(QtCore.QSortFilterProxyModel):
@@ -62,6 +64,16 @@ class MyWindow(QtWidgets.QWidget):
         self.ui.treeView.doubleClicked.connect(self.on_tree_view_double_clicked)
 
         self.ui.horizontalScrollBar.valueChanged.connect(self.slider_move)
+
+        self.ui.lineEdit_SearchName.textChanged.connect(self.find_in)
+        self.ui.lineEdit_SearchArt.textChanged.connect(self.find_in)
+        self.ui.lineEdit_min.textChanged.connect(self.find_in)
+        self.ui.lineEdit_max.textChanged.connect(self.find_in)
+        self.ui.comboBox.editTextChanged.connect(self.find_in)
+
+        # self.ui.pushButton.clicked(lambda: QDesktopServices.openUrl(QUrl(self.ui.label_5.text())))
+        # self.ui.pushButton.clicked(lambda: QDesktopServices.openUrl(QUrl(self.ui.label_5.text())))
+        self.ui.pushButton.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(self.ui.label_5.text())))
         # додатковий код для заповнення treeView
         # ...
 
@@ -70,6 +82,7 @@ class MyWindow(QtWidgets.QWidget):
         global custom_model
         global full_category
         global custom_category
+        global datas
 
         # -------------------мій функціонал-------------------------
         me_data = open_price()
@@ -77,9 +90,13 @@ class MyWindow(QtWidgets.QWidget):
         custom_model = self.create_me_model(me_data[2])
         full_category = self.create_category(me_data[0])
         custom_category = self.create_category(me_data[2])
+        datas = me_data[0]
         self.treeView_set_model(self.ui.treeView, full_model)
         self.combo_box_set_data()
+        self.ui.label.setText('Знайдено: ' + str(self.ui.treeView.model().rowCount()))
 
+    def label_count(self):
+        self.ui.label.setText('Знайдено: ' + str(self.ui.treeView.model().rowCount()))
 
     def update_image(self, art):
         global pixmaps
@@ -87,8 +104,9 @@ class MyWindow(QtWidgets.QWidget):
         count = len(pixmaps)
         img.get_image(self.ui.label_img, pixmaps[0])
         self.ui.horizontalScrollBar.setMaximum(len(pixmaps) - 1)
+        self.ui.horizontalScrollBar.setValue(0)
         self.ui.label_art.setText('Доступно ' + str(count) + ' зображень.')
-        self.ui.label_5.setText('https://viyar.ua/store/Items/photos/ph' + art + '.jpg')
+        self.ui.label_5.setText('https://viyar.ua/ua/search/?q=' + art)
 
     def on_tree_view_double_clicked(self, index: QModelIndex):
         print(f"Подвійний клік на елементі з індексом {index.row()}")
@@ -105,8 +123,8 @@ class MyWindow(QtWidgets.QWidget):
         except:
             pass
 
-    def create_category(self, data):
-        category = list(set([d['Category'] for d in data]))
+    def create_category(self, me_data):
+        category = list(set([d['Category'] for d in me_data]))
         category.sort()
         return category
 
@@ -129,7 +147,6 @@ class MyWindow(QtWidgets.QWidget):
 
     def treeView_set_model(self, tree_view, me_model):
         # -----------Встановлюємо заголовки стовпців---------------------------------------------------------------
-        # self.clear_model(tree_view, tree_view.model())
         tree_view.setModel(me_model)
         header = tree_view.header()
         header.resizeSection(0, 80)
@@ -168,15 +185,74 @@ class MyWindow(QtWidgets.QWidget):
 
     def full_price_triggered(self):
         # Handle Повний прайс
+        global datas
+        datas = self.model_to_dict(full_model)
         self.treeView_set_model(self.ui.treeView, full_model)
         self.combo_box_set_data()
-        print("Action 1 triggered")
+        self.ui.label.setText('Знайдено: ' + str(self.ui.treeView.model().rowCount()))
+        # print("Action 1 triggered")
 
     def custom_price_triggered(self):
         # Handle action 2
+        global datas
+        datas = self.model_to_dict(custom_model)
         self.treeView_set_model(self.ui.treeView, custom_model)
         self.combo_box_set_data(custom_category)
-        print("Action 2 triggered")
+        self.ui.label.setText('Знайдено: ' + str(self.ui.treeView.model().rowCount()))
+        # print("Action 2 triggered")
+
+    def model_to_dict(self, me_model):
+        data = []
+        key = ['Article', 'Name', 'Price', 'Unit', 'Category']
+        for row in range(me_model.rowCount()):
+            row_data = {}
+            for column in range(me_model.columnCount()):
+                index = me_model.index(row, column)
+                row_data[key[column]] = me_model.data(index)
+            data.append(row_data)
+        return data
+
+    def find_in(self):
+        global datas
+        header = self.ui.treeView.header()
+        column = header.sortIndicatorSection()
+        order = header.sortIndicatorOrder()
+        self.ui.treeView.setSortingEnabled(False)
+        min_price = float(self.ui.lineEdit_min.text()) if self.ui.lineEdit_min.text() else 0
+        max_price = float(self.ui.lineEdit_max.text()) if self.ui.lineEdit_max.text() != '0' else float(10 ** 22)
+        data_price = list(filter(lambda x: min_price <= float(x['Price']) <= max_price, datas))
+        txt = self.ui.lineEdit_SearchArt.text()
+        if len(txt) > 1:
+            data_art = find_txt_in_price(txt.lower(), data_price, 'Article')
+        else:
+            data_art = data_price
+
+
+        txt = self.ui.comboBox.currentText()
+        if len(txt) > 1:
+            data_category = find_txt_in_price(txt.lower(), data_art, 'Category')
+        else:
+            data_category = data_art
+
+
+        txt = self.ui.lineEdit_SearchName.text()
+        if len(txt) > 1:
+            data_name = find_txt_in_price(txt.lower(), data_category, 'Name')
+        else:
+            data_name = data_category
+
+
+        if not len(data_name) == self.ui.treeView.model().rowCount():
+            self.ui.model2 = QStandardItemModel()
+            self.ui.model2 = self.create_me_model(data_name)
+            self.treeView_set_model(self.ui.treeView, self.ui.model2)
+            row_count = self.ui.model2.rowCount()
+            self.ui.label.setText(f"Знайдено: {row_count}")
+
+            # вивести модель
+            self.ui.treeView.show()
+            self.ui.treeView.setSortingEnabled(True)
+            self.ui.treeView.sortByColumn(column, order)
 
 
 # Create the application and show the main window

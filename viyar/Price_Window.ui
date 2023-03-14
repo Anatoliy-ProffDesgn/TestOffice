@@ -291,7 +291,7 @@
       <item>
        <widget class="QPushButton" name="pushButton">
         <property name="text">
-         <string>Завантажити на viyar.ua</string>
+         <string>Завантажити з сайту viyar.ua</string>
         </property>
        </widget>
       </item>

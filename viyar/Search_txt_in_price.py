@@ -23,7 +23,7 @@ def find_txt_in_price(txt, list_price, key):
             # if not str(item_txt).lower() in search_str:
             #     inf = False
             #     break
-        if  inf:
+        if inf:
             tmp.append(item)
 
     l_txt = find_del_list(txt)
