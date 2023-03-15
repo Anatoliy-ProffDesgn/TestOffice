@@ -193,7 +193,7 @@ class MyWindow(QtWidgets.QWidget):
         self.context_menu_2.addAction("Змінити кількість", self.full_price_triggered)
         self.context_menu_2.addSeparator()
         self.context_menu_2.addAction("Видалити рядок", self.del_select_row)
-        self.context_menu_2.addAction("Очистити все", self.custom_price_triggered)
+        self.context_menu_2.addAction("Очистити все", self.del_all_row)
         # Show the context menu at the cursor's position
         self.context_menu_2.exec_(self.ui.treeView_2.mapToGlobal(point))
 
@@ -220,6 +220,9 @@ class MyWindow(QtWidgets.QWidget):
         selected_rows = selection_model.selectedRows()  # Отримати список виділених рядків
         for row in reversed(selected_rows):  # Видалити виділені рядки з моделі
             self.ui.treeView_2.model().removeRow(row.row())
+    def del_all_row(self):
+        for row in reversed(range(self.ui.treeView_2.model().rowCount())):  # Видалити виділені рядки з моделі
+            self.ui.treeView_2.model().removeRow(row)
 
     def full_price_triggered(self):
         # Handle Повний прайс
