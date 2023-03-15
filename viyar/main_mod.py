@@ -85,8 +85,9 @@ class MyWindow(QtWidgets.QWidget):
         custom_model = self.create_me_model(me_data[2])
         full_category = self.create_category(me_data[0])
         custom_category = self.create_category(me_data[2])
-        model_null = self.create_me_model([])
-        self.treeView_set_model(self.ui.treeView_2, model_null)
+        null_model = self.create_me_model([])
+        self.treeView_set_model(self.ui.treeView_2, null_model)
+        null_model.horizontalHeaderItem(null_model.columnCount() - 1).setText('Кількість')
         datas = me_data[0]
         self.treeView_set_model(self.ui.treeView, full_model)
         self.combo_box_set_data()
@@ -185,20 +186,17 @@ class MyWindow(QtWidgets.QWidget):
         # Show the context menu at the cursor's position
         self.context_menu.exec_(self.ui.treeView.mapToGlobal(point))
 
-    def add_row_to_treeview2(self):
+    def add_row_to_treeview_2(self):
         selected_indexes = self.ui.treeView.selectionModel().selectedIndexes()
         model = self.ui.treeView.model()
         row_data = [QStandardItem(model.data(index)) for index in selected_indexes]
-
-        model = self.ui.treeView_2.model()
-        parent_index = self.ui.treeView_2.currentIndex()
-
-        # Отримати базову модель, яка була використана для створення CustomSortModel
-        source_model = model.sourceModel()
-
-        # Отримати батьківський елемент з базової моделі
-        parent_item = source_model.itemFromIndex(parent_index)
-        parent_item.appendRow(row_data)
+        count_me_dialog, ok_pressed = QInputDialog.getInt(
+            QtWidgets.QWidget(), "Кількість", "Введіть кількість:",  value=1)
+        if ok_pressed:
+            row_data[-1] = QStandardItem(str(count_me_dialog))
+            global null_model
+            parent_item = null_model.invisibleRootItem()
+            parent_item.appendRow(row_data)
 
     def full_price_triggered(self):
         # Handle Повний прайс
