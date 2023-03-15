@@ -3,7 +3,7 @@ from multiprocessing import Process
 from PyQt5 import QtWidgets, QtGui, QtCore, Qt
 from PyQt5.QtCore import QStringListModel, QModelIndex, QUrl
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QMovie, QDesktopServices
-from PyQt5.QtWidgets import QHeaderView
+from PyQt5.QtWidgets import QHeaderView, QInputDialog
 
 import inet_test
 from Price_Window import Ui_Form
@@ -12,15 +12,9 @@ import Images as img
 from Search_txt_in_price import find_txt_in_price
 
 # -------------------Global-------------------------
-global full_model
-global custom_model
-global old_model
-global null_model
-global save_model
-global full_category
-global custom_category
-global label_width
-global label_height
+global full_model, custom_model, old_model, null_model, save_model
+global full_category, custom_category
+global label_width, label_height
 global pixmaps
 global datas
 
@@ -62,6 +56,9 @@ class MyWindow(QtWidgets.QWidget):
         # Connect the context menu signal to a slot
         self.ui.treeView.customContextMenuRequested.connect(self.show_context_menu)
         self.ui.treeView.doubleClicked.connect(self.on_tree_view_double_clicked)
+        self.ui.treeView.clicked.connect(self.on_tree_view_clicked)
+        self.ui.treeView.setAlternatingRowColors(True)
+        self.ui.treeView_2.setAlternatingRowColors(True)
 
         self.ui.horizontalScrollBar.valueChanged.connect(self.slider_move)
 
@@ -78,10 +75,8 @@ class MyWindow(QtWidgets.QWidget):
         # ...
 
         # -------------------Global-------------------------
-        global full_model
-        global custom_model
-        global full_category
-        global custom_category
+        global full_model, custom_model, null_model
+        global full_category, custom_category
         global datas
 
         # -------------------мій функціонал-------------------------
@@ -90,6 +85,8 @@ class MyWindow(QtWidgets.QWidget):
         custom_model = self.create_me_model(me_data[2])
         full_category = self.create_category(me_data[0])
         custom_category = self.create_category(me_data[2])
+        model_null = self.create_me_model([])
+        self.treeView_set_model(self.ui.treeView_2, model_null)
         datas = me_data[0]
         self.treeView_set_model(self.ui.treeView, full_model)
         self.combo_box_set_data()
@@ -106,6 +103,9 @@ class MyWindow(QtWidgets.QWidget):
         self.ui.horizontalScrollBar.setMaximum(len(pixmaps) - 1)
         self.ui.horizontalScrollBar.setValue(0)
         self.ui.label_art.setText('Доступно ' + str(count) + ' зображень.')
+
+    def on_tree_view_clicked(self, index: QModelIndex):
+        art = self.ui.treeView.model().index(index.row(), 0).data()
         self.ui.label_5.setText('https://viyar.ua/ua/search/?q=' + art)
 
     def on_tree_view_double_clicked(self, index: QModelIndex):
@@ -178,10 +178,27 @@ class MyWindow(QtWidgets.QWidget):
     def show_context_menu(self, point):
         # Create a context menu
         self.context_menu = QtWidgets.QMenu(self)
+        self.context_menu.addAction("Додати у замовлення", self.add_row_to_treeview2)
+        self.context_menu.addSeparator()
         self.context_menu.addAction("Повний прайс", self.full_price_triggered)
         self.context_menu.addAction("Мій прайс", self.custom_price_triggered)
         # Show the context menu at the cursor's position
         self.context_menu.exec_(self.ui.treeView.mapToGlobal(point))
+
+    def add_row_to_treeview2(self):
+        selected_indexes = self.ui.treeView.selectionModel().selectedIndexes()
+        model = self.ui.treeView.model()
+        row_data = [QStandardItem(model.data(index)) for index in selected_indexes]
+
+        model = self.ui.treeView_2.model()
+        parent_index = self.ui.treeView_2.currentIndex()
+
+        # Отримати базову модель, яка була використана для створення CustomSortModel
+        source_model = model.sourceModel()
+
+        # Отримати батьківський елемент з базової моделі
+        parent_item = source_model.itemFromIndex(parent_index)
+        parent_item.appendRow(row_data)
 
     def full_price_triggered(self):
         # Handle Повний прайс
@@ -227,20 +244,17 @@ class MyWindow(QtWidgets.QWidget):
         else:
             data_art = data_price
 
-
         txt = self.ui.comboBox.currentText()
         if len(txt) > 1:
             data_category = find_txt_in_price(txt.lower(), data_art, 'Category')
         else:
             data_category = data_art
 
-
         txt = self.ui.lineEdit_SearchName.text()
         if len(txt) > 1:
             data_name = find_txt_in_price(txt.lower(), data_category, 'Name')
         else:
             data_name = data_category
-
 
         if not len(data_name) == self.ui.treeView.model().rowCount():
             self.ui.model2 = QStandardItemModel()
