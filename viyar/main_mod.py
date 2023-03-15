@@ -58,6 +58,7 @@ class MyWindow(QtWidgets.QWidget):
         self.ui.treeView.doubleClicked.connect(self.on_tree_view_double_clicked)
         self.ui.treeView.clicked.connect(self.on_tree_view_clicked)
         self.ui.treeView.setAlternatingRowColors(True)
+        self.ui.treeView_2.customContextMenuRequested.connect(self.show_context_menu_2)
         self.ui.treeView_2.setAlternatingRowColors(True)
 
         self.ui.horizontalScrollBar.valueChanged.connect(self.slider_move)
@@ -179,24 +180,46 @@ class MyWindow(QtWidgets.QWidget):
     def show_context_menu(self, point):
         # Create a context menu
         self.context_menu = QtWidgets.QMenu(self)
-        self.context_menu.addAction("Додати у замовлення", self.add_row_to_treeview2)
+        self.context_menu.addAction("Додати у замовлення", self.add_row_to_treeview_2)
         self.context_menu.addSeparator()
         self.context_menu.addAction("Повний прайс", self.full_price_triggered)
         self.context_menu.addAction("Мій прайс", self.custom_price_triggered)
         # Show the context menu at the cursor's position
         self.context_menu.exec_(self.ui.treeView.mapToGlobal(point))
 
+    def show_context_menu_2(self, point):
+        # Create a context menu
+        self.context_menu_2 = QtWidgets.QMenu(self)
+        self.context_menu_2.addAction("Змінити кількість", self.full_price_triggered)
+        self.context_menu_2.addSeparator()
+        self.context_menu_2.addAction("Видалити рядок", self.del_select_row)
+        self.context_menu_2.addAction("Очистити все", self.custom_price_triggered)
+        # Show the context menu at the cursor's position
+        self.context_menu_2.exec_(self.ui.treeView_2.mapToGlobal(point))
+
     def add_row_to_treeview_2(self):
-        selected_indexes = self.ui.treeView.selectionModel().selectedIndexes()
-        model = self.ui.treeView.model()
-        row_data = [QStandardItem(model.data(index)) for index in selected_indexes]
-        count_me_dialog, ok_pressed = QInputDialog.getInt(
-            QtWidgets.QWidget(), "Кількість", "Введіть кількість:",  value=1)
-        if ok_pressed:
-            row_data[-1] = QStandardItem(str(count_me_dialog))
-            global null_model
-            parent_item = null_model.invisibleRootItem()
-            parent_item.appendRow(row_data)
+        selected_indexes = self.ui.treeView.selectionModel().selectedIndexes()  # отримання списку індексів виділених рядків
+        if len(selected_indexes) > 0:  # перевірка, чи є хоча б один виділений рядок
+            selected_indexes = self.ui.treeView.selectionModel().selectedIndexes()  # отримання списку індексів виділених рядків
+            model = self.ui.treeView.model()  # отримання моделі дерева
+            row_data = [
+                QStandardItem(model.data(index)) for index in
+                selected_indexes]  # створення списку з елементів виділених рядків
+            count_me_dialog, ok_pressed = QInputDialog.getInt(
+                QtWidgets.QWidget(), "Кількість", "Введіть кількість:",
+                value=1)  # створення діалогового вікна для введення кількості
+            if ok_pressed:  # перевірка, чи було натиснуто кнопку "ОК" у діалоговому вікні
+                row_data[-1] = QStandardItem(
+                    str(count_me_dialog))  # заміна значення останнього стовпця на введену кількість
+                global null_model  # отримання глобальної змінної null_model
+                parent_item = null_model.invisibleRootItem()  # отримання кореневого елемента дерева
+                parent_item.appendRow(row_data)  # додавання нового рядка до дерева
+
+    def del_select_row(self):
+        selection_model = self.ui.treeView_2.selectionModel()  # Отримати вибрану модель виділень
+        selected_rows = selection_model.selectedRows()  # Отримати список виділених рядків
+        for row in reversed(selected_rows):  # Видалити виділені рядки з моделі
+            self.ui.treeView_2.model().removeRow(row.row())
 
     def full_price_triggered(self):
         # Handle Повний прайс
