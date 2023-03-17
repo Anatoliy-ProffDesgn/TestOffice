@@ -454,7 +454,7 @@ def save_to_csv():
 
         if path:
             # Відкрити файл для запису
-            with open('/Shablon/viyar_form_furniture.csv', newline='') as csvfile:
+            with open('Shablon/viyar_form_furniture.csv', newline='') as csvfile:
                 dialect = csv.Sniffer().sniff(csvfile.read(1024))
                 sep = str(dialect.delimiter)
             with open(path, "w", newline="") as f:

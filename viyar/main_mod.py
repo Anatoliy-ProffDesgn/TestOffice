@@ -1,3 +1,6 @@
+import csv
+import datetime
+import os
 from multiprocessing import Process
 
 from PyQt5 import QtWidgets, QtGui, QtCore, Qt
@@ -63,15 +66,16 @@ class MyWindow(QtWidgets.QWidget):
 
         self.ui.horizontalScrollBar.valueChanged.connect(self.slider_move)
 
-        self.ui.lineEdit_SearchName.textChanged.connect(self.find_in)
-        self.ui.lineEdit_SearchArt.textChanged.connect(self.find_in)
-        self.ui.lineEdit_min.textChanged.connect(self.find_in)
-        self.ui.lineEdit_max.textChanged.connect(self.find_in)
+        self.ui.lineEdit_SearchName.textEdited.connect(self.find_in)
+        self.ui.lineEdit_SearchArt.textEdited.connect(self.find_in)
+        self.ui.lineEdit_min.textEdited.connect(self.find_in)
+        self.ui.lineEdit_max.textEdited.connect(self.find_in)
         self.ui.comboBox.editTextChanged.connect(self.find_in)
 
         # self.ui.pushButton.clicked(lambda: QDesktopServices.openUrl(QUrl(self.ui.label_5.text())))
         # self.ui.pushButton.clicked(lambda: QDesktopServices.openUrl(QUrl(self.ui.label_5.text())))
         self.ui.pushButton.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(self.ui.label_5.text())))
+        self.ui.pushButton_SaveViyar.clicked.connect(self.save_to_csv)
         # додатковий код для заповнення treeView
         # ...
 
@@ -220,6 +224,7 @@ class MyWindow(QtWidgets.QWidget):
         selected_rows = selection_model.selectedRows()  # Отримати список виділених рядків
         for row in reversed(selected_rows):  # Видалити виділені рядки з моделі
             self.ui.treeView_2.model().removeRow(row.row())
+
     def del_all_row(self):
         for row in reversed(range(self.ui.treeView_2.model().rowCount())):  # Видалити виділені рядки з моделі
             self.ui.treeView_2.model().removeRow(row)
@@ -291,6 +296,41 @@ class MyWindow(QtWidgets.QWidget):
             self.ui.treeView.show()
             self.ui.treeView.setSortingEnabled(True)
             self.ui.treeView.sortByColumn(column, order)
+
+    def save_to_csv(self):
+        # Відкрити діалогове вікно для вибору шляху до файлу
+        try:
+            if not os.path.isdir('./temp/'):
+                os.makedirs('./temp/')
+            if self.ui.treeView_2.model().rowCount() > 0:
+                f_name = 'Замовлення фурнітури Віяр від ' + datetime.datetime.now().strftime('%d_%m_%Y')
+                Form = QtWidgets.QWidget()
+                file_dialog = QtWidgets.QFileDialog(Form)
+                temp_folder = os.path.abspath('./temp/')
+                file_dialog.setDirectory(temp_folder)
+                path, _ = file_dialog.getSaveFileName(Form, "Save File", os.path.join(temp_folder, f_name),
+                                                      "CSV Files (*.csv)")
+
+                if path:
+                    # Відкрити файл для запису
+                    with open('Shablon/viyar_form_furniture.csv', newline='') as csvfile:
+                        dialect = csv.Sniffer().sniff(csvfile.read(1024))
+                        sep = str(dialect.delimiter)
+                    with open(path, "w", newline="") as f:
+                        writer = csv.writer(f, delimiter=sep)
+
+                        # Записати заголовки
+                        headers = ['Код', 'К-во']
+                        writer.writerow(headers)
+                        model=self.ui.treeView_2.model()
+                        # Записати дані
+                        for row in range(model.rowCount()):
+                            kod = str(model.data(model.index(row, 0)))
+                            kol = str(model.data(model.index(row, 4)))
+                            values = [kod, kol]
+                            writer.writerow(values)
+        except:
+            print('Save error')
 
 
 # Create the application and show the main window
