@@ -1,6 +1,7 @@
-from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication, QDialog, QLabel, QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QScrollArea
+from PyQt5.QtWidgets import QDialog, QLabel, QVBoxLayout, QHBoxLayout, QPushButton, QWidget
+
+
 class MyLabel(QLabel):
     def __init__(self, pixmaps, parent=None):
         super().__init__(parent)
@@ -26,6 +27,7 @@ class MyLabel(QLabel):
         else:
             self.show_next_image()
 
+
 class MyImageDialog(QDialog):
     def __init__(self, pixmaps, name):
         super().__init__()
@@ -41,11 +43,7 @@ class MyImageDialog(QDialog):
 
         # Create a label for the image and load the first pixmap
         self.label = MyLabel(self.pixmaps)
-        # self.label.setPixmap(self.pixmaps[self.index])
         self.label.setAlignment(Qt.AlignCenter)
-
-
-        # Create a label for the image and load the first pixmap
 
         # Create buttons for navigating between images
         self.prev_button = QPushButton("<", self)
@@ -57,15 +55,19 @@ class MyImageDialog(QDialog):
         button_layout.addWidget(self.prev_button)
         button_layout.addWidget(self.next_button)
 
+        # Create a label for the current index and total number of images
+        self.index_label = QLabel(self)
+        self.name_label = QLabel(self)
+        self.update_index_label()
+        label_layout = QHBoxLayout()
+        label_layout.addWidget(self.index_label)
+        label_layout.addWidget(self.name_label)
+
         # Create a layout for the label and button layouts
         layout = QVBoxLayout()
         layout.addWidget(self.label)
         layout.addLayout(button_layout)
-
-        # Create a label for the current index and total number of images
-        self.index_label = QLabel(self)
-        self.update_index_label()
-        layout.addWidget(self.index_label)
+        layout.addLayout(label_layout)
 
         # Create a main widget and set the layout
         widget = QWidget()
@@ -77,13 +79,6 @@ class MyImageDialog(QDialog):
         self.prev_button.clicked.connect(self.show_previous_image)
         self.next_button.clicked.connect(self.show_next_image)
         self.next_button.setFocus()
-
-
-        # self.scroll = QScrollArea()
-        # self.scroll.setWidget(self.label)
-        # # Встановлення зв'язків між подіями та обробником подій
-        # self.scroll.verticalScrollBar().valueChanged.connect(self.on_scroll)
-        # self.label.mouseReleaseEvent = self.on_mouse_release
 
         self.show()
 
@@ -112,7 +107,8 @@ class MyImageDialog(QDialog):
         self.update_index_label()
 
     def update_index_label(self):
-        self.index_label.setText(f"{self.index+1} із {len(self.pixmaps)} зображень")
+        self.index_label.setText(f"{self.index + 1} із {len(self.pixmaps)} зображень")
+        self.name_label.setText(self.name)
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape:
@@ -122,19 +118,6 @@ class MyImageDialog(QDialog):
         elif event.key() == Qt.Key_Down:
             self.show_previous_image()
 
-    # def wheelEvent(self, event):
-        # Increase or decrease zoom level based on direction of scroll
-        # self.zoom_level += 1 if event.angleDelta().y() > 0 else -1
-        # self.zoom_level = max(-5, min(self.zoom_level, 5))
-        # if self.zoom_level != 0:
-        #     # Scale the pixmap based on the zoom level
-        #     pixmap = self.pixmaps[self.index]
-        #     scaled_size = pixmap.size() * (1 + self.zoom_level * 0.1)
-        #     pixmap = pixmap.scaled(scaled_size.toSize(), Qt.KeepAspectRatio, transformMode=Qt.SmoothTransformation)
-        #     self.label.setPixmap(pixmap)
-        # else:
-        #     # Reset the pixmap to the original size
-        #     self.label.setPixmap(self.pixmaps[self.index])
 
 def open_img_window(pixmaps):
     dialog = MyImageDialog(pixmaps)

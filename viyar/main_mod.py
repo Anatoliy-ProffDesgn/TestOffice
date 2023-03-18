@@ -121,16 +121,8 @@ class MyWindow(QtWidgets.QWidget):
         self.img_window.exec_()
 
 
-        # count = len(pixmaps)
-        # img.get_image(self.ui.label_img, pixmaps[0])
-        # self.ui.horizontalScrollBar.setMaximum(len(pixmaps) - 1)
-        # self.ui.horizontalScrollBar.setValue(0)
-        # self.ui.label_art.setText('Доступно ' + str(count) + ' зображень.')
-
-
     def on_tree_view_clicked(self, index: QModelIndex):
         art = self.ui.treeView.model().index(index.row(), 0).data()
-        # self.ui.label_5.setText('https://viyar.ua/ua/search/?q=' + art)
         self.ui.pushButton.setText('https://viyar.ua/ua/search/?q=' + art)
 
     def on_tree_view_double_clicked(self, index: QModelIndex):
@@ -202,22 +194,35 @@ class MyWindow(QtWidgets.QWidget):
         self.ui.comboBox.setCurrentIndex(-1)
 
     def show_context_menu(self, point):
+        bold_font = QtGui.QFont()
+        bold_font.setBold(True)
         # Create a context menu
         self.context_menu = QtWidgets.QMenu(self)
-        self.context_menu.addAction("Додати у замовлення", self.add_row_to_treeview_2)
+        self.context_menu.addAction("Додати у замовлення", self.add_row_to_treeview_2).setFont(bold_font)
         self.context_menu.addSeparator()
         self.context_menu.addAction("Повний прайс", self.full_price_triggered)
         self.context_menu.addAction("Мій прайс", self.custom_price_triggered)
+        self.context_menu.addSeparator()
+        self.context_menu.addAction("Оновити прайс", self.custom_price_triggered)
         # Show the context menu at the cursor's position
         self.context_menu.exec_(self.ui.treeView.mapToGlobal(point))
 
     def show_context_menu_2(self, point):
+        bold_font = QtGui.QFont()
+        bold_font.setBold(True)
         # Create a context menu
         self.context_menu_2 = QtWidgets.QMenu(self)
-        self.context_menu_2.addAction("Змінити кількість", self.full_price_triggered)
+        self.context_menu_2.addAction(QtGui.QIcon("icons/edit.png"), "Змінити кількість", self.full_price_triggered).setFont(bold_font)
         self.context_menu_2.addSeparator()
-        self.context_menu_2.addAction("Видалити рядок", self.del_select_row)
-        self.context_menu_2.addAction("Очистити все", self.del_all_row)
+        self.context_menu_2.addAction(QtGui.QIcon("icons/del.png"), "Видалити", self.del_select_row)
+        self.context_menu_2.addAction(QtGui.QIcon("icons/clear.png"), "Очистити все", self.del_all_row)
+        self.context_menu_2.addSeparator()
+        self.context_menu_2.addAction(QtGui.QIcon("icons/re_save.png"), "Зберегти як користувацький прайс (!Увага заміна!)", self.del_select_row)
+        self.context_menu_2.addSeparator()
+        self.context_menu_2.addAction(QtGui.QIcon("icons/add_save.png"), "Додати у користувацький прайс", self.del_all_row).setFont(bold_font)
+        self.context_menu_2.addSeparator()
+        self.context_menu_2.addAction(QtGui.QIcon("icons/csv_load.png"), "Завантажити .csv", self.del_select_row)
+        self.context_menu_2.addAction(QtGui.QIcon("icons/csv_save.png"), "Зберегти .csv(для імпорту на Віяр)", self.del_all_row).setFont(bold_font)
         # Show the context menu at the cursor's position
         self.context_menu_2.exec_(self.ui.treeView_2.mapToGlobal(point))
 

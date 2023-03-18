@@ -8,7 +8,7 @@ from PyQt5.QtCore import QUrl, Qt
 from PyQt5.QtGui import QStandardItemModel, QDesktopServices, QPixmap
 from PyQt5.QtWidgets import QInputDialog, QApplication, QSplashScreen, QMessageBox, QButtonGroup
 
-import img_viwer
+from old import img_viwer
 from Open_Price import open_price
 from Price_Window import *
 from Search_txt_in_price import find_txt_in_price
