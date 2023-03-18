@@ -1,17 +1,19 @@
 import csv
 import datetime
 import os
+import sys
 from multiprocessing import Process
 
 from PyQt5 import QtWidgets, QtGui, QtCore, Qt
-from PyQt5.QtCore import QStringListModel, QModelIndex, QUrl
+from PyQt5.QtCore import QStringListModel, QModelIndex, QUrl, QTimer
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QMovie, QDesktopServices
-from PyQt5.QtWidgets import QHeaderView, QInputDialog
+from PyQt5.QtWidgets import QHeaderView, QInputDialog, QTreeView, QToolTip, QApplication
 
 import inet_test
 from Price_Window import Ui_Form
 from Open_Price import open_price
 import Images as img
+import img_window as img_w
 from Search_txt_in_price import find_txt_in_price
 
 # -------------------Global-------------------------
@@ -63,6 +65,7 @@ class MyWindow(QtWidgets.QWidget):
         self.ui.treeView.setAlternatingRowColors(True)
         self.ui.treeView_2.customContextMenuRequested.connect(self.show_context_menu_2)
         self.ui.treeView_2.setAlternatingRowColors(True)
+        self.ui.treeView_2.doubleClicked.connect(self.on_tree_view_double_clicked)
 
         self.ui.horizontalScrollBar.valueChanged.connect(self.slider_move)
 
@@ -76,6 +79,7 @@ class MyWindow(QtWidgets.QWidget):
         # self.ui.pushButton.clicked(lambda: QDesktopServices.openUrl(QUrl(self.ui.label_5.text())))
         self.ui.pushButton.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(self.ui.label_5.text())))
         self.ui.pushButton_SaveViyar.clicked.connect(self.save_to_csv)
+        self.ui.pushButton.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(self.ui.pushButton.text())))
         # додатковий код для заповнення treeView
         # ...
 
@@ -85,6 +89,8 @@ class MyWindow(QtWidgets.QWidget):
         global datas
 
         # -------------------мій функціонал-------------------------
+
+        self.img_window = None  # define img_window as an instance variable
         me_data = open_price()
         full_model = self.create_me_model(me_data[0])
         custom_model = self.create_me_model(me_data[2])
@@ -98,26 +104,40 @@ class MyWindow(QtWidgets.QWidget):
         self.combo_box_set_data()
         self.ui.label.setText('Знайдено: ' + str(self.ui.treeView.model().rowCount()))
 
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self.ui.treeView.resizeEvent(event)
+
     def label_count(self):
         self.ui.label.setText('Знайдено: ' + str(self.ui.treeView.model().rowCount()))
 
-    def update_image(self, art):
+    def update_image(self, art, name='Мої зображення'):
         global pixmaps
         pixmaps = img.count_image(art)
-        count = len(pixmaps)
-        img.get_image(self.ui.label_img, pixmaps[0])
-        self.ui.horizontalScrollBar.setMaximum(len(pixmaps) - 1)
-        self.ui.horizontalScrollBar.setValue(0)
-        self.ui.label_art.setText('Доступно ' + str(count) + ' зображень.')
+        if self.img_window:  # якщо вікно вже існує, закриваємо його
+            self.img_window.reject()
+        self.img_window = img_w.MyImageDialog(pixmaps, name)
+        self.img_window.setModal(True)
+        self.img_window.exec_()
+
+
+        # count = len(pixmaps)
+        # img.get_image(self.ui.label_img, pixmaps[0])
+        # self.ui.horizontalScrollBar.setMaximum(len(pixmaps) - 1)
+        # self.ui.horizontalScrollBar.setValue(0)
+        # self.ui.label_art.setText('Доступно ' + str(count) + ' зображень.')
+
 
     def on_tree_view_clicked(self, index: QModelIndex):
         art = self.ui.treeView.model().index(index.row(), 0).data()
-        self.ui.label_5.setText('https://viyar.ua/ua/search/?q=' + art)
+        # self.ui.label_5.setText('https://viyar.ua/ua/search/?q=' + art)
+        self.ui.pushButton.setText('https://viyar.ua/ua/search/?q=' + art)
 
     def on_tree_view_double_clicked(self, index: QModelIndex):
         print(f"Подвійний клік на елементі з індексом {index.row()}")
-        art = self.ui.treeView.model().index(index.row(), 0).data()
-        self.update_image(art)
+        art = index.model().index(index.row(), 0).data()
+        name = index.model().index(index.row(), 1).data()
+        self.update_image(art, name)
 
     def slider_move(self):
         global pixmaps
