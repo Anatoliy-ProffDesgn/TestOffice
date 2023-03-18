@@ -82,20 +82,6 @@ class MyImageDialog(QDialog):
 
         self.show()
 
-    def on_scroll(self, event):
-        if event.orientation() == Qt.Vertical:
-            if event.angleDelta().y() > 0:
-                self.show_previous_image()
-            else:
-                self.show_next_image()
-
-    def on_mouse_release(self, event):
-        if event.button() == Qt.LeftButton:
-            if event.pos().x() < self.label.width() / 2:
-                self.show_previous_image()
-            else:
-                self.show_next_image()
-
     def show_previous_image(self):
         self.index = (self.index - 1) % len(self.pixmaps)
         self.label.setPixmap(self.pixmaps[self.index])
@@ -113,10 +99,12 @@ class MyImageDialog(QDialog):
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape:
             self.reject()
-        elif event.key() == Qt.Key_Up:
-            self.show_next_image()
-        elif event.key() == Qt.Key_Down:
+
+    def wheelEvent(self, event):
+        if event.angleDelta().y() > 0:
             self.show_previous_image()
+        else:
+            self.show()
 
 
 def open_img_window(pixmaps):

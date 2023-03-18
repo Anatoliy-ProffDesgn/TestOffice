@@ -57,7 +57,8 @@ class MyWindow(QtWidgets.QWidget):
         self.ui.treeView.header().setSortIndicator(0, QtCore.Qt.AscendingOrder)
         self.ui.treeView.header().setSortIndicatorShown(True)
         self.ui.treeView.sortByColumn(0, QtCore.Qt.AscendingOrder)
-
+        self.context_menu_2 = QtWidgets.QMenu(self)
+        self.context_menu = QtWidgets.QMenu(self)
         # Connect the context menu signal to a slot
         self.ui.treeView.customContextMenuRequested.connect(self.show_context_menu)
         self.ui.treeView.doubleClicked.connect(self.on_tree_view_double_clicked)
@@ -197,7 +198,7 @@ class MyWindow(QtWidgets.QWidget):
         bold_font = QtGui.QFont()
         bold_font.setBold(True)
         # Create a context menu
-        self.context_menu = QtWidgets.QMenu(self)
+        # self.context_menu = QtWidgets.QMenu(self)
         self.context_menu.addAction("Додати у замовлення", self.add_row_to_treeview_2).setFont(bold_font)
         self.context_menu.addSeparator()
         self.context_menu.addAction("Повний прайс", self.full_price_triggered)
@@ -211,7 +212,7 @@ class MyWindow(QtWidgets.QWidget):
         bold_font = QtGui.QFont()
         bold_font.setBold(True)
         # Create a context menu
-        self.context_menu_2 = QtWidgets.QMenu(self)
+        # self.context_menu_2 = QtWidgets.QMenu(self)
         self.context_menu_2.addAction(QtGui.QIcon("icons/edit.png"), "Змінити кількість", self.full_price_triggered).setFont(bold_font)
         self.context_menu_2.addSeparator()
         self.context_menu_2.addAction(QtGui.QIcon("icons/del.png"), "Видалити", self.del_select_row)
