@@ -41,6 +41,9 @@ class CustomSortModel(QtCore.QSortFilterProxyModel):
 class MyWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
+        # Create a bold_font
+        bold_font = QtGui.QFont()
+        bold_font.setBold(True)
 
         # Create an instance of the form
         self.ui = Ui_Form()
@@ -48,39 +51,67 @@ class MyWindow(QtWidgets.QWidget):
         # Call the setupUi method passing self as parent
         self.ui.setupUi(self)
 
-        # Do other stuff here
         # Create a QStandardItemModel and set it as the model of the treeView
         self.model = QtGui.QStandardItemModel()
-        self.ui.treeView.setModel(self.model)
 
-        # Sort the data by the first column
+        # Create a treeView_2
+        self.ui.treeView.setModel(self.model)
         self.ui.treeView.header().setSortIndicator(0, QtCore.Qt.AscendingOrder)
         self.ui.treeView.header().setSortIndicatorShown(True)
         self.ui.treeView.sortByColumn(0, QtCore.Qt.AscendingOrder)
-        self.context_menu_2 = QtWidgets.QMenu(self)
-        self.context_menu = QtWidgets.QMenu(self)
-        # Connect the context menu signal to a slot
-        self.ui.treeView.customContextMenuRequested.connect(self.show_context_menu)
         self.ui.treeView.doubleClicked.connect(self.on_tree_view_double_clicked)
         self.ui.treeView.clicked.connect(self.on_tree_view_clicked)
         self.ui.treeView.setAlternatingRowColors(True)
-        self.ui.treeView_2.customContextMenuRequested.connect(self.show_context_menu_2)
+
+        # Create a treeView_2
         self.ui.treeView_2.setAlternatingRowColors(True)
         self.ui.treeView_2.doubleClicked.connect(self.on_tree_view_double_clicked)
 
-        self.ui.horizontalScrollBar.valueChanged.connect(self.slider_move)
+        # Create a context_menu
+        self.context_menu = QtWidgets.QMenu(self)
+        self.context_menu.addAction("Додати у замовлення", self.add_row_to_treeview_2).setFont(bold_font)
+        self.context_menu.addSeparator()
+        self.context_menu.addAction("Повний прайс", self.full_price_triggered)
+        self.context_menu.addAction("Мій прайс", self.custom_price_triggered)
+        self.context_menu.addSeparator()
+        self.context_menu.addAction("Оновити прайс", self.custom_price_triggered)
+        self.ui.treeView.customContextMenuRequested.connect(self.show_context_menu)
 
+        # Create a context_menu_2
+        self.context_menu_2 = QtWidgets.QMenu(self)
+        self.context_menu_2.addAction(QtGui.QIcon("icons/edit.png"),
+                                      "Змінити кількість", self.full_price_triggered).setFont(bold_font)
+        self.context_menu_2.addSeparator()
+        self.context_menu_2.addAction(QtGui.QIcon("icons/del.png"),
+                                      "Видалити", self.del_select_row)
+        self.context_menu_2.addAction(QtGui.QIcon("icons/clear.png"),
+                                      "Очистити все", self.del_all_row)
+        self.context_menu_2.addSeparator()
+        self.context_menu_2.addAction(QtGui.QIcon("icons/re_save.png"),
+                                      "Зберегти як користувацький прайс (!Увага заміна!)", self.del_select_row)
+        self.context_menu_2.addSeparator()
+        self.context_menu_2.addAction(QtGui.QIcon("icons/add_save.png"),
+                                      "Додати у користувацький прайс", self.del_all_row).setFont(bold_font)
+        self.context_menu_2.addSeparator()
+        self.context_menu_2.addAction(QtGui.QIcon("icons/csv_load.png"),
+                                      "Завантажити .csv", self.del_select_row)
+        self.context_menu_2.addAction(QtGui.QIcon("icons/csv_save.png"),
+                                      "Зберегти .csv(для імпорту на Віяр)", self.del_all_row).setFont(bold_font)
+        self.ui.treeView_2.customContextMenuRequested.connect(self.show_context_menu_2)
+
+        # Create a lineEdit-s
         self.ui.lineEdit_SearchName.textEdited.connect(self.find_in)
         self.ui.lineEdit_SearchArt.textEdited.connect(self.find_in)
         self.ui.lineEdit_min.textEdited.connect(self.find_in)
         self.ui.lineEdit_max.textEdited.connect(self.find_in)
         self.ui.comboBox.editTextChanged.connect(self.find_in)
 
-        # self.ui.pushButton.clicked(lambda: QDesktopServices.openUrl(QUrl(self.ui.label_5.text())))
-        # self.ui.pushButton.clicked(lambda: QDesktopServices.openUrl(QUrl(self.ui.label_5.text())))
+        # Create a pushButton-s
         self.ui.pushButton.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(self.ui.label_5.text())))
         self.ui.pushButton_SaveViyar.clicked.connect(self.save_to_csv)
         self.ui.pushButton.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(self.ui.pushButton.text())))
+
+        self.ui.horizontalScrollBar.valueChanged.connect(self.slider_move)
         # додатковий код для заповнення treeView
         # ...
 
@@ -120,7 +151,6 @@ class MyWindow(QtWidgets.QWidget):
         self.img_window = img_w.MyImageDialog(pixmaps, name)
         self.img_window.setModal(True)
         self.img_window.exec_()
-
 
     def on_tree_view_clicked(self, index: QModelIndex):
         art = self.ui.treeView.model().index(index.row(), 0).data()
@@ -195,36 +225,10 @@ class MyWindow(QtWidgets.QWidget):
         self.ui.comboBox.setCurrentIndex(-1)
 
     def show_context_menu(self, point):
-        bold_font = QtGui.QFont()
-        bold_font.setBold(True)
-        # Create a context menu
-        # self.context_menu = QtWidgets.QMenu(self)
-        self.context_menu.addAction("Додати у замовлення", self.add_row_to_treeview_2).setFont(bold_font)
-        self.context_menu.addSeparator()
-        self.context_menu.addAction("Повний прайс", self.full_price_triggered)
-        self.context_menu.addAction("Мій прайс", self.custom_price_triggered)
-        self.context_menu.addSeparator()
-        self.context_menu.addAction("Оновити прайс", self.custom_price_triggered)
         # Show the context menu at the cursor's position
         self.context_menu.exec_(self.ui.treeView.mapToGlobal(point))
 
     def show_context_menu_2(self, point):
-        bold_font = QtGui.QFont()
-        bold_font.setBold(True)
-        # Create a context menu
-        # self.context_menu_2 = QtWidgets.QMenu(self)
-        self.context_menu_2.addAction(QtGui.QIcon("icons/edit.png"), "Змінити кількість", self.full_price_triggered).setFont(bold_font)
-        self.context_menu_2.addSeparator()
-        self.context_menu_2.addAction(QtGui.QIcon("icons/del.png"), "Видалити", self.del_select_row)
-        self.context_menu_2.addAction(QtGui.QIcon("icons/clear.png"), "Очистити все", self.del_all_row)
-        self.context_menu_2.addSeparator()
-        self.context_menu_2.addAction(QtGui.QIcon("icons/re_save.png"), "Зберегти як користувацький прайс (!Увага заміна!)", self.del_select_row)
-        self.context_menu_2.addSeparator()
-        self.context_menu_2.addAction(QtGui.QIcon("icons/add_save.png"), "Додати у користувацький прайс", self.del_all_row).setFont(bold_font)
-        self.context_menu_2.addSeparator()
-        self.context_menu_2.addAction(QtGui.QIcon("icons/csv_load.png"), "Завантажити .csv", self.del_select_row)
-        self.context_menu_2.addAction(QtGui.QIcon("icons/csv_save.png"), "Зберегти .csv(для імпорту на Віяр)", self.del_all_row).setFont(bold_font)
-        # Show the context menu at the cursor's position
         self.context_menu_2.exec_(self.ui.treeView_2.mapToGlobal(point))
 
     def add_row_to_treeview_2(self):
@@ -330,11 +334,11 @@ class MyWindow(QtWidgets.QWidget):
                 os.makedirs('./temp/')
             if self.ui.treeView_2.model().rowCount() > 0:
                 f_name = 'Замовлення фурнітури Віяр від ' + datetime.datetime.now().strftime('%d_%m_%Y')
-                Form = QtWidgets.QWidget()
-                file_dialog = QtWidgets.QFileDialog(Form)
+                form = QtWidgets.QWidget()
+                file_dialog = QtWidgets.QFileDialog(form)
                 temp_folder = os.path.abspath('./temp/')
                 file_dialog.setDirectory(temp_folder)
-                path, _ = file_dialog.getSaveFileName(Form, "Save File", os.path.join(temp_folder, f_name),
+                path, _ = file_dialog.getSaveFileName(form, "Save File", os.path.join(temp_folder, f_name),
                                                       "CSV Files (*.csv)")
 
                 if path:
@@ -348,7 +352,7 @@ class MyWindow(QtWidgets.QWidget):
                         # Записати заголовки
                         headers = ['Код', 'К-во']
                         writer.writerow(headers)
-                        model=self.ui.treeView_2.model()
+                        model = self.ui.treeView_2.model()
                         # Записати дані
                         for row in range(model.rowCount()):
                             kod = str(model.data(model.index(row, 0)))

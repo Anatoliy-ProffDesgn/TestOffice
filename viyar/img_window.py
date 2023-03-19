@@ -35,14 +35,11 @@ class MyImageDialog(QDialog):
         self.index = 0
         self.current_pixmap_index = 0
         self.name = name
-        self.initUI()
-
-    def initUI(self):
+        self.label = MyLabel(self.pixmaps)
         self.setWindowTitle(self.name)
         self.setGeometry(100, 100, 400, 300)
 
         # Create a label for the image and load the first pixmap
-        self.label = MyLabel(self.pixmaps)
         self.label.setAlignment(Qt.AlignCenter)
 
         # Create buttons for navigating between images
