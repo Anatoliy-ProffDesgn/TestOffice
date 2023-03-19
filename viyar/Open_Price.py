@@ -14,13 +14,16 @@ def open_price(file_name=''):
     with open(file[0], 'r', encoding='utf-8') as f:
         price = js.load(f)
     prices = [price, file]
-    try:
-        with open('Custom/customPrice.json', 'r', encoding='utf-8') as f:
-            custom_price = js.load(f)
-            prices.append(custom_price)
-    except:
-        prices.append([])
     return prices
+
+
+def open_custom_price(file_name='Custom/customPrice.json'):
+    try:
+        with open(file_name, 'r', encoding='utf-8') as f:
+            custom_price = js.load(f)
+    except:
+        pass
+    return custom_price
 
 
 def new_file(files):
@@ -35,13 +38,16 @@ def new_file(files):
 
     # print(latest_file)
     return latest_file
+
+
 # ---------------test------------------
-# i = 0
-# j = 0
-# for p in open_price():
-#     i += 1
-#     search_str = 'зав'
-#     if (search_str.lower() in str(p['Name']).lower()) or (search_str.lower() in str(p['Category']).lower()):
-#         j += 1
-#         print(i, p)
-# print('Знайдено', j)
+if __name__ == "__main__":
+    i = 0
+    j = 0
+    for p in open_price():
+        i += 1
+        search_str = 'зав'
+        if (search_str.lower() in str(p['Name']).lower()) or (search_str.lower() in str(p['Category']).lower()):
+            j += 1
+            print(i, p)
+    print('Знайдено', j)

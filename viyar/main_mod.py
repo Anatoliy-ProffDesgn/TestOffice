@@ -11,11 +11,12 @@ from PyQt5.QtWidgets import QHeaderView, QInputDialog, QTreeView, QToolTip, QApp
 
 import inet_test
 from Price_Window import Ui_Form
-from Open_Price import open_price
+from Open_Price import open_price, open_custom_price
 import Images as img
 import img_window as img_w
 from Search_txt_in_price import find_txt_in_price
 from CustomPrice import save_custom_price
+from main_Full_Updete_Price import load_update
 
 # -------------------Global-------------------------
 global full_model, custom_model, old_model, null_model, save_model
@@ -23,25 +24,32 @@ global full_category, custom_category
 global label_width, label_height
 global pixmaps
 global datas
+global sorting
 
 
 class CustomSortModel(QtCore.QSortFilterProxyModel):
+    global sorting
     def lessThan(self, left, right):
         # Сортувати як числа колонки (індекс 2 та 0)
-        if left.column() == right.column() == 2 or left.column() == right.column() == 0:
-            if left.data() and right.data():
-                left_data = float(left.data())
-                right_data = float(right.data())
-                return left_data < right_data
+        if sorting:
+            if left.column() == right.column() == 2 or left.column() == right.column() == 0:
+                if left.data() and right.data():
+                    left_data = float(left.data())
+                    right_data = float(right.data())
+                    return left_data < right_data
+                else:
+                    return False
             else:
-                return False
+                return super().lessThan(left, right)
         else:
-            return super().lessThan(left, right)
+            return False
 
 
 class MyWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
+        global sorting
+        sorting = True
         # Create a bold_font
         bold_font = QtGui.QFont()
         bold_font.setBold(True)
@@ -66,31 +74,32 @@ class MyWindow(QtWidgets.QWidget):
 
         # Create a treeView_2
         self.ui.treeView_2.setAlternatingRowColors(True)
+        # іelf.ui.treeView_2.model().dataChanged.connect(self.on_data_changed)
         self.ui.treeView_2.clicked.connect(self.on_tree_view_2_clicked)
         self.ui.treeView_2.doubleClicked.connect(self.on_tree_view_double_clicked)
 
         # Create a context_menu
         self.context_menu = QtWidgets.QMenu(self)
-        self.context_menu.addAction("Додати у замовлення", self.add_row_to_treeview_2).setFont(bold_font)
+        self.context_menu.addAction("Додати до замовлення", self.add_row_to_treeview_2).setFont(bold_font)
         self.context_menu.addSeparator()
         self.context_menu.addAction(QtGui.QIcon("icons/del.png"),
-                                      "Видалити", self.del_select_row)
-        self.context_menu.addSeparator()
+                                    "Видалити", self.del_select_row)
+        self.context_menu.addSeparator().setText('111')
         self.context_menu.addAction("Повний прайс", self.full_price_triggered)
         self.context_menu.addAction("Мій прайс", self.custom_price_triggered)
         self.context_menu.addSeparator()
         self.context_menu.addAction(QtGui.QIcon("icons/re_save.png"),
-                                      "Зберегти як користувацький прайс (!Увага заміна!)", self.custom_price_resave)
+                                    "Зберегти як мій прайс (!Увага заміна!)", self.custom_price_resave)
         self.context_menu.addAction(QtGui.QIcon("icons/add_save.png"),
-                                      "Додати у користувацький прайс", self.custom_price_save)
+                                    "Додати у мій прайс", self.custom_price_save)
         self.context_menu.addSeparator()
-        self.context_menu.addAction("Оновити прайс", self.custom_price_triggered)
+        self.context_menu.addAction("Оновити прайс", lambda checked, arg=True: self.update_price(arg))
         self.ui.treeView.customContextMenuRequested.connect(self.show_context_menu)
 
         # Create a context_menu_2
         self.context_menu_2 = QtWidgets.QMenu(self)
         self.context_menu_2.addAction(QtGui.QIcon("icons/edit.png"),
-                                      "Змінити кількість", self.full_price_triggered).setFont(bold_font)
+                                      "Змінити кількість", self.on_action_kol_triggered).setFont(bold_font)
         self.context_menu_2.addSeparator()
         self.context_menu_2.addAction(QtGui.QIcon("icons/del.png"),
                                       "Видалити", self.del2_select_row)
@@ -98,15 +107,15 @@ class MyWindow(QtWidgets.QWidget):
                                       "Очистити все", self.del_all_row)
         self.context_menu_2.addSeparator()
         self.context_menu_2.addAction(QtGui.QIcon("icons/re_save.png"),
-                                      "Зберегти як користувацький прайс (!Увага заміна!)", self.custom_price2_resave)
+                                      "Переписати мій прайс (!Увага заміна!)", self.custom_price2_resave)
         self.context_menu_2.addSeparator()
         self.context_menu_2.addAction(QtGui.QIcon("icons/add_save.png"),
-                                      "Додати у користувацький прайс", self.custom_price2_save)
+                                      "Додати у мій прайс", self.custom_price2_save)
         self.context_menu_2.addSeparator()
         self.context_menu_2.addAction(QtGui.QIcon("icons/csv_load.png"),
-                                      "Завантажити .csv", self.del_select_row)
+                                      "Завантажити .csv", self.del_select_row).setEnabled(False)
         self.context_menu_2.addAction(QtGui.QIcon("icons/csv_save.png"),
-                                      "Зберегти .csv(для імпорту на Віяр)", self.del_all_row).setFont(bold_font)
+                                      "Зберегти .csv(для імпорту на Віяр)", self.save_to_csv).setFont(bold_font)
         self.ui.treeView_2.customContextMenuRequested.connect(self.show_context_menu_2)
 
         # Create a lineEdit-s
@@ -135,16 +144,18 @@ class MyWindow(QtWidgets.QWidget):
         self.img_window = None  # define img_window as an instance variable
         me_data = open_price()
         full_model = self.create_me_model(me_data[0])
-        custom_model = self.create_me_model(me_data[2])
         full_category = self.create_category(me_data[0])
-        custom_category = self.create_category(me_data[2])
         null_model = self.create_me_model([])
         self.treeView_set_model(self.ui.treeView_2, null_model)
         null_model.horizontalHeaderItem(null_model.columnCount() - 1).setText('Кількість')
+        null_model.horizontalHeaderItem(null_model.columnCount() - 2).setText('Сума')
         datas = me_data[0]
         self.treeView_set_model(self.ui.treeView, full_model)
         self.combo_box_set_data()
         self.ui.label.setText('Знайдено: ' + str(self.ui.treeView.model().rowCount()))
+        self.ui.treeView_2.model().dataChanged.connect(self.on_treeView_2_Changed)
+        self.ui.treeView_2.model().rowsInserted.connect(self.on_treeView_2_Changed)  # додайте цей рядок
+        self.ui.treeView_2.model().rowsRemoved.connect(self.on_treeView_2_Changed)
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
@@ -169,24 +180,14 @@ class MyWindow(QtWidgets.QWidget):
     def on_tree_view_2_clicked(self, index: QModelIndex):
         art = self.ui.treeView_2.model().index(index.row(), 0).data()
         self.ui.pushButton.setText('https://viyar.ua/ua/search/?q=' + art)
-        # Отримати доступ до моделі даних, що використовується в QTreeView
-        model = self.ui.treeView.model()
-
-        # Пройтися по всіх елементах моделі
+        model = self.ui.treeView.model()  # Пройтися по всіх елементах моделі
         for row in range(model.rowCount()):
-            # Отримати індекс елемента за допомогою моделі
-            index = model.index(row, 0)
-
-            # Отримати дані елемента за допомогою індексу
-            data = model.data(index)
-
-            # Порівняти дані зі шуканим значенням
-            if data == art:
-                # Отримати індекс рядка
-                row_index = model.index(row, 0)
-
-                # Виділити рядок
-                self.ui.treeView.selectionModel().select(row_index, QtCore.QItemSelectionModel.ClearAndSelect)
+            index = model.index(row, 0)  # Отримати індекс елемента за допомогою моделі
+            data = model.data(index)  # Отримати дані елемента за допомогою індексу
+            if data == art:  # Порівняти дані зі шуканим значенням
+                row_index = model.index(row, 0)  # Отримати індекс рядка
+                self.ui.treeView.selectionModel().select(row_index,
+                                                         QtCore.QItemSelectionModel.ClearAndSelect)  # Виділити рядок
                 break
 
     def on_tree_view_double_clicked(self, index: QModelIndex):
@@ -247,8 +248,8 @@ class MyWindow(QtWidgets.QWidget):
         tree_view.setModel(sort_model)
         tree_view.setSortingEnabled(True)
 
-    def combo_box_set_data(self, data=''):
-        if data == '':
+    def combo_box_set_data(self, data=None):
+        if data is None:
             data = full_category
         model = QStringListModel()
         model.setStringList(data)
@@ -276,11 +277,30 @@ class MyWindow(QtWidgets.QWidget):
                 QtWidgets.QWidget(), "Кількість", "Введіть кількість:",
                 value=1)  # створення діалогового вікна для введення кількості
             if ok_pressed:  # перевірка, чи було натиснуто кнопку "ОК" у діалоговому вікні
+                kol = int(count_me_dialog)
+                price = float(row_data[-3].text())
+                rez = round(kol*price,2)
                 row_data[-1] = QStandardItem(
-                    str(count_me_dialog))  # заміна значення останнього стовпця на введену кількість
+                    str(kol))  # заміна значення останнього стовпця на введену кількість
+                row_data[-2] = QStandardItem(str(rez))
                 global null_model  # отримання глобальної змінної null_model
                 parent_item = null_model.invisibleRootItem()  # отримання кореневого елемента дерева
                 parent_item.appendRow(row_data)  # додавання нового рядка до дерева
+
+    def on_treeView_2_Changed(self):
+        try:
+            model = self.ui.treeView_2.model()
+            column = model.columnCount() - 2  # get the second last column
+            sum = 0
+            for row in range(model.rowCount()):
+                index = model.index(row, column)
+                value = model.data(index)
+                sum += float(value)
+            print(sum)  # print the sum of the column
+            self.ui.label_summ.setText('Сума: ' + str(round(sum,2)))
+        except:
+            self.ui.label_summ.setText('Сума:______')
+
     def del_select_row(self):
         selection_model = self.ui.treeView.selectionModel()  # Отримати вибрану модель виділень
         selected_rows = selection_model.selectedRows()  # Отримати список виділених рядків
@@ -308,23 +328,44 @@ class MyWindow(QtWidgets.QWidget):
         # print("Action 1 triggered")
 
     def custom_price_triggered(self):
-        # Handle action 2
         global datas
+        me_custom_data = open_custom_price()
+        custom_model = self.create_me_model(me_custom_data)
+        custom_category = self.create_category(me_custom_data)
         datas = self.model_to_dict(custom_model)
         self.treeView_set_model(self.ui.treeView, custom_model)
         self.combo_box_set_data(custom_category)
         self.ui.label.setText('Знайдено: ' + str(self.ui.treeView.model().rowCount()))
-        # print("Action 2 triggered")
+
+    def on_action_kol_triggered(self):
+        global sorting
+        model = self.ui.treeView_2.model()
+        row = self.ui.treeView_2.currentIndex().row()
+        kol = model.data(model.index(row, 4))
+        count_me_dialog, ok_pressed = QInputDialog.getInt(
+            QtWidgets.QWidget(), "Кількість", "Введіть кількість:", value=int(kol))
+        if ok_pressed:
+            sorting=False
+            model.setData(model.index(row, 4), count_me_dialog)
+            kol = int(count_me_dialog)
+            price = float(model.data(model.index(row, 2)))
+            rez = round(kol * price, 2)
+            model.setData(model.index(row, 3), rez)
+            self.ui.treeView_2.update()
+            sorting=True
 
     def custom_price_save(self):
         global datas
         save_custom_price(datas, self.ui.treeView)
+
     def custom_price_resave(self):
         global datas
         save_custom_price(datas, self.ui.treeView, True)
+
     def custom_price2_save(self):
         global datas
         save_custom_price(datas, self.ui.treeView_2)
+
     def custom_price2_resave(self):
         global datas
         save_custom_price(datas, self.ui.treeView_2, True)
@@ -414,6 +455,9 @@ class MyWindow(QtWidgets.QWidget):
         except:
             print('Save error')
 
+    def update_price(updt=False):
+        if updt:
+            load_update()
 
 # Create the application and show the main window
 app = QtWidgets.QApplication([])
