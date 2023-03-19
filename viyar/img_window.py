@@ -3,12 +3,13 @@ from PyQt5.QtWidgets import QDialog, QLabel, QVBoxLayout, QHBoxLayout, QPushButt
 
 
 class MyLabel(QLabel):
-    def __init__(self, pixmaps, parent=None):
+    def __init__(self, pixmaps, index_label, parent=None):
         super().__init__(parent)
 
         self.pixmaps = pixmaps
         self.index = 0
         self.update_pixmap()
+        self.index_label = index_label
 
     def update_pixmap(self):
         self.setPixmap(self.pixmaps[self.index])
@@ -16,10 +17,12 @@ class MyLabel(QLabel):
     def show_previous_image(self):
         self.index = (self.index - 1) % len(self.pixmaps)
         self.update_pixmap()
+        self.index_label.setText(f"{self.index + 1} із {len(self.pixmaps)} зображень")
 
     def show_next_image(self):
         self.index = (self.index + 1) % len(self.pixmaps)
         self.update_pixmap()
+        self.index_label.setText(f"{self.index + 1} із {len(self.pixmaps)} зображень")
 
     def wheelEvent(self, event):
         if event.angleDelta().y() > 0:
@@ -35,12 +38,9 @@ class MyImageDialog(QDialog):
         self.index = 0
         self.current_pixmap_index = 0
         self.name = name
-        self.label = MyLabel(self.pixmaps)
         self.setWindowTitle(self.name)
         self.setGeometry(100, 100, 400, 300)
 
-        # Create a label for the image and load the first pixmap
-        self.label.setAlignment(Qt.AlignCenter)
 
         # Create buttons for navigating between images
         self.prev_button = QPushButton("<", self)
@@ -55,6 +55,11 @@ class MyImageDialog(QDialog):
         # Create a label for the current index and total number of images
         self.index_label = QLabel(self)
         self.name_label = QLabel(self)
+        self.label = MyLabel(self.pixmaps, self.index_label)
+        # Create a label for the image and load the first pixmap
+        self.label.setAlignment(Qt.AlignCenter)
+        self.name_label.setText(self.name)
+
         self.update_index_label()
         label_layout = QHBoxLayout()
         label_layout.addWidget(self.index_label)
@@ -91,7 +96,6 @@ class MyImageDialog(QDialog):
 
     def update_index_label(self):
         self.index_label.setText(f"{self.index + 1} із {len(self.pixmaps)} зображень")
-        self.name_label.setText(self.name)
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape:
