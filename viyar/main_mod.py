@@ -5,7 +5,7 @@ import sys
 from multiprocessing import Process
 
 from PyQt5 import QtWidgets, QtGui, QtCore, Qt
-from PyQt5.QtCore import QStringListModel, QModelIndex, QUrl, QTimer
+from PyQt5.QtCore import QStringListModel, QModelIndex, QUrl, QTimer, QItemSelectionModel
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QMovie, QDesktopServices
 from PyQt5.QtWidgets import QHeaderView, QInputDialog, QTreeView, QToolTip, QApplication
 
@@ -15,6 +15,7 @@ from Open_Price import open_price
 import Images as img
 import img_window as img_w
 from Search_txt_in_price import find_txt_in_price
+from CustomPrice import save_custom_price
 
 # -------------------Global-------------------------
 global full_model, custom_model, old_model, null_model, save_model
@@ -54,7 +55,7 @@ class MyWindow(QtWidgets.QWidget):
         # Create a QStandardItemModel and set it as the model of the treeView
         self.model = QtGui.QStandardItemModel()
 
-        # Create a treeView_2
+        # Create a treeView
         self.ui.treeView.setModel(self.model)
         self.ui.treeView.header().setSortIndicator(0, QtCore.Qt.AscendingOrder)
         self.ui.treeView.header().setSortIndicatorShown(True)
@@ -65,14 +66,23 @@ class MyWindow(QtWidgets.QWidget):
 
         # Create a treeView_2
         self.ui.treeView_2.setAlternatingRowColors(True)
+        self.ui.treeView_2.clicked.connect(self.on_tree_view_2_clicked)
         self.ui.treeView_2.doubleClicked.connect(self.on_tree_view_double_clicked)
 
         # Create a context_menu
         self.context_menu = QtWidgets.QMenu(self)
         self.context_menu.addAction("Додати у замовлення", self.add_row_to_treeview_2).setFont(bold_font)
         self.context_menu.addSeparator()
+        self.context_menu.addAction(QtGui.QIcon("icons/del.png"),
+                                      "Видалити", self.del_select_row)
+        self.context_menu.addSeparator()
         self.context_menu.addAction("Повний прайс", self.full_price_triggered)
         self.context_menu.addAction("Мій прайс", self.custom_price_triggered)
+        self.context_menu.addSeparator()
+        self.context_menu.addAction(QtGui.QIcon("icons/re_save.png"),
+                                      "Зберегти як користувацький прайс (!Увага заміна!)", self.custom_price_resave)
+        self.context_menu.addAction(QtGui.QIcon("icons/add_save.png"),
+                                      "Додати у користувацький прайс", self.custom_price_save)
         self.context_menu.addSeparator()
         self.context_menu.addAction("Оновити прайс", self.custom_price_triggered)
         self.ui.treeView.customContextMenuRequested.connect(self.show_context_menu)
@@ -83,15 +93,15 @@ class MyWindow(QtWidgets.QWidget):
                                       "Змінити кількість", self.full_price_triggered).setFont(bold_font)
         self.context_menu_2.addSeparator()
         self.context_menu_2.addAction(QtGui.QIcon("icons/del.png"),
-                                      "Видалити", self.del_select_row)
+                                      "Видалити", self.del2_select_row)
         self.context_menu_2.addAction(QtGui.QIcon("icons/clear.png"),
                                       "Очистити все", self.del_all_row)
         self.context_menu_2.addSeparator()
         self.context_menu_2.addAction(QtGui.QIcon("icons/re_save.png"),
-                                      "Зберегти як користувацький прайс (!Увага заміна!)", self.del_select_row)
+                                      "Зберегти як користувацький прайс (!Увага заміна!)", self.custom_price2_resave)
         self.context_menu_2.addSeparator()
         self.context_menu_2.addAction(QtGui.QIcon("icons/add_save.png"),
-                                      "Додати у користувацький прайс", self.del_all_row).setFont(bold_font)
+                                      "Додати у користувацький прайс", self.custom_price2_save)
         self.context_menu_2.addSeparator()
         self.context_menu_2.addAction(QtGui.QIcon("icons/csv_load.png"),
                                       "Завантажити .csv", self.del_select_row)
@@ -155,6 +165,29 @@ class MyWindow(QtWidgets.QWidget):
     def on_tree_view_clicked(self, index: QModelIndex):
         art = self.ui.treeView.model().index(index.row(), 0).data()
         self.ui.pushButton.setText('https://viyar.ua/ua/search/?q=' + art)
+
+    def on_tree_view_2_clicked(self, index: QModelIndex):
+        art = self.ui.treeView_2.model().index(index.row(), 0).data()
+        self.ui.pushButton.setText('https://viyar.ua/ua/search/?q=' + art)
+        # Отримати доступ до моделі даних, що використовується в QTreeView
+        model = self.ui.treeView.model()
+
+        # Пройтися по всіх елементах моделі
+        for row in range(model.rowCount()):
+            # Отримати індекс елемента за допомогою моделі
+            index = model.index(row, 0)
+
+            # Отримати дані елемента за допомогою індексу
+            data = model.data(index)
+
+            # Порівняти дані зі шуканим значенням
+            if data == art:
+                # Отримати індекс рядка
+                row_index = model.index(row, 0)
+
+                # Виділити рядок
+                self.ui.treeView.selectionModel().select(row_index, QtCore.QItemSelectionModel.ClearAndSelect)
+                break
 
     def on_tree_view_double_clicked(self, index: QModelIndex):
         print(f"Подвійний клік на елементі з індексом {index.row()}")
@@ -248,8 +281,14 @@ class MyWindow(QtWidgets.QWidget):
                 global null_model  # отримання глобальної змінної null_model
                 parent_item = null_model.invisibleRootItem()  # отримання кореневого елемента дерева
                 parent_item.appendRow(row_data)  # додавання нового рядка до дерева
-
     def del_select_row(self):
+        selection_model = self.ui.treeView.selectionModel()  # Отримати вибрану модель виділень
+        selected_rows = selection_model.selectedRows()  # Отримати список виділених рядків
+        for row in reversed(selected_rows):  # Видалити виділені рядки з моделі
+            self.ui.treeView.model().removeRow(row.row())
+        self.label_count()
+
+    def del2_select_row(self):
         selection_model = self.ui.treeView_2.selectionModel()  # Отримати вибрану модель виділень
         selected_rows = selection_model.selectedRows()  # Отримати список виділених рядків
         for row in reversed(selected_rows):  # Видалити виділені рядки з моделі
@@ -276,6 +315,19 @@ class MyWindow(QtWidgets.QWidget):
         self.combo_box_set_data(custom_category)
         self.ui.label.setText('Знайдено: ' + str(self.ui.treeView.model().rowCount()))
         # print("Action 2 triggered")
+
+    def custom_price_save(self):
+        global datas
+        save_custom_price(datas, self.ui.treeView)
+    def custom_price_resave(self):
+        global datas
+        save_custom_price(datas, self.ui.treeView, True)
+    def custom_price2_save(self):
+        global datas
+        save_custom_price(datas, self.ui.treeView_2)
+    def custom_price2_resave(self):
+        global datas
+        save_custom_price(datas, self.ui.treeView_2, True)
 
     def model_to_dict(self, me_model):
         data = []
