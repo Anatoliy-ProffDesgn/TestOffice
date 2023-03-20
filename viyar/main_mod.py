@@ -1,25 +1,19 @@
 import csv
 import datetime
 import os
-import sys
-from functools import partial
-from multiprocessing import Process
-from pprint import pprint
+
 import pyperclip
-
 from PyQt5 import QtWidgets, QtGui, QtCore, Qt
-from PyQt5.QtCore import QStringListModel, QModelIndex, QUrl, QTimer, QItemSelectionModel, QAbstractTableModel, Qt
-from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QMovie, QDesktopServices
-from PyQt5.QtWidgets import QHeaderView, QInputDialog, QTreeView, QToolTip, QApplication, QSplashScreen, \
-    QStyledItemDelegate
+from PyQt5.QtCore import QStringListModel, QModelIndex, QUrl, QAbstractTableModel, Qt
+from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QDesktopServices
+from PyQt5.QtWidgets import QInputDialog, QTreeView, QSplashScreen, QStyledItemDelegate
 
-import inet_test
-from Price_Window import Ui_Form
-from Open_Price import open_price, open_custom_price
 import Images as img
 import img_window as img_w
-from Search_txt_in_price import find_txt_in_price
 from CustomPrice import save_custom_price
+from Open_Price import open_price, open_custom_price
+from Price_Window import Ui_Form
+from Search_txt_in_price import find_txt_in_price
 from main_Full_Updete_Price import load_update
 
 # -------------------Global-------------------------
