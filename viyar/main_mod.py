@@ -128,13 +128,7 @@ class MyWindow(QtWidgets.QWidget):
         self.ui.comboBox.editTextChanged.connect(self.find_in)
 
         # Create a pushButton-s
-        self.ui.pushButton.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(self.ui.label_5.text())))
-        self.ui.pushButton_SaveViyar.clicked.connect(self.save_to_csv)
         self.ui.pushButton.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(self.ui.pushButton.text())))
-
-        self.ui.horizontalScrollBar.valueChanged.connect(self.slider_move)
-        # додатковий код для заповнення treeView
-        # ...
 
         # -------------------Global-------------------------
         global full_model, custom_model, null_model
@@ -160,10 +154,6 @@ class MyWindow(QtWidgets.QWidget):
         self.ui.treeView_2.model().dataChanged.connect(self.on_treeView_2_Changed)
         self.ui.treeView_2.model().rowsInserted.connect(self.on_treeView_2_Changed)  # додайте цей рядок
         self.ui.treeView_2.model().rowsRemoved.connect(self.on_treeView_2_Changed)
-
-    def resizeEvent(self, event):
-        super().resizeEvent(event)
-        self.ui.treeView.resizeEvent(event)
 
     def label_count(self):
         self.ui.label.setText('Знайдено: ' + str(self.ui.treeView.model().rowCount()))
@@ -199,16 +189,6 @@ class MyWindow(QtWidgets.QWidget):
         art = index.model().index(index.row(), 0).data()
         name = index.model().index(index.row(), 1).data()
         self.update_image(art, name)
-
-    def slider_move(self):
-        global pixmaps
-        try:
-            index = self.ui.horizontalScrollBar.value()
-            count = len(pixmaps)
-            img.get_image(self.ui.label_img, pixmaps[self.ui.horizontalScrollBar.value()])
-            self.ui.label_art.setText(index + 1, 'із', count, 'зображень.')
-        except:
-            pass
 
     def create_category(self, me_data):
         category = list(set([d['Category'] for d in me_data]))
