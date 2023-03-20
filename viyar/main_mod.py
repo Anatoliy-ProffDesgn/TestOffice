@@ -2,6 +2,7 @@ import csv
 import datetime
 import os
 import sys
+from functools import partial
 from multiprocessing import Process
 
 from PyQt5 import QtWidgets, QtGui, QtCore, Qt
@@ -93,7 +94,8 @@ class MyWindow(QtWidgets.QWidget):
         self.context_menu.addAction(QtGui.QIcon("icons/add_save.png"),
                                     "Додати у мій прайс", self.custom_price_save)
         self.context_menu.addSeparator()
-        self.context_menu.addAction("Оновити прайс", lambda checked, arg=True: self.update_price(arg))
+        self.context_menu.addAction("Оновити прайс", lambda: self.update_price(True))
+        # self.context_menu.addAction("Оновити прайс", partial(self.update_price, True))
         self.ui.treeView.customContextMenuRequested.connect(self.show_context_menu)
 
         # Create a context_menu_2
@@ -143,6 +145,8 @@ class MyWindow(QtWidgets.QWidget):
 
         self.img_window = None  # define img_window as an instance variable
         me_data = open_price()
+        price_name = me_data[1][0]
+        self.setWindowTitle(price_name)
         full_model = self.create_me_model(me_data[0])
         full_category = self.create_category(me_data[0])
         null_model = self.create_me_model([])
@@ -455,7 +459,7 @@ class MyWindow(QtWidgets.QWidget):
         except:
             print('Save error')
 
-    def update_price(updt=False):
+    def update_price(self, updt=False):
         if updt:
             load_update()
 
