@@ -9,23 +9,26 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>794</width>
+    <width>1173</width>
     <height>805</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Прайс</string>
   </property>
+  <property name="windowIcon">
+   <iconset theme="E:\TestOffice\viyar\images\ico.png"/>
+  </property>
   <widget class="QWidget" name="gridLayoutWidget">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>791</width>
+     <width>1171</width>
      <height>801</height>
     </rect>
    </property>
-   <layout class="QGridLayout" name="gridLayout" rowstretch="0" columnstretch="7">
+   <layout class="QGridLayout" name="gridLayout" rowstretch="0" columnstretch="6,3">
     <property name="leftMargin">
      <number>3</number>
     </property>
@@ -103,6 +106,9 @@
          <widget class="QComboBox" name="comboBox">
           <property name="editable">
            <bool>true</bool>
+          </property>
+          <property name="maxVisibleItems">
+           <number>20</number>
           </property>
          </widget>
         </item>
@@ -288,6 +294,51 @@
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="0" column="1">
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QPushButton" name="pushButton_Past">
+        <property name="text">
+         <string>Завантажити таблицю примірник</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTreeView" name="treeView_3">
+        <property name="editTriggers">
+         <set>QAbstractItemView::AllEditTriggers</set>
+        </property>
+        <property name="tabKeyNavigation">
+         <bool>false</bool>
+        </property>
+        <property name="dragEnabled">
+         <bool>true</bool>
+        </property>
+        <property name="dragDropOverwriteMode">
+         <bool>true</bool>
+        </property>
+        <property name="dragDropMode">
+         <enum>QAbstractItemView::DragDrop</enum>
+        </property>
+        <property name="defaultDropAction">
+         <enum>Qt::TargetMoveAction</enum>
+        </property>
+        <property name="alternatingRowColors">
+         <bool>true</bool>
+        </property>
+        <property name="selectionMode">
+         <enum>QAbstractItemView::MultiSelection</enum>
+        </property>
+        <property name="sortingEnabled">
+         <bool>false</bool>
+        </property>
+        <property name="allColumnsShowFocus">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

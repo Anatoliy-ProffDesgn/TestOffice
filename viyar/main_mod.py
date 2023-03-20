@@ -4,11 +4,14 @@ import os
 import sys
 from functools import partial
 from multiprocessing import Process
+from pprint import pprint
+import pyperclip
 
 from PyQt5 import QtWidgets, QtGui, QtCore, Qt
-from PyQt5.QtCore import QStringListModel, QModelIndex, QUrl, QTimer, QItemSelectionModel
+from PyQt5.QtCore import QStringListModel, QModelIndex, QUrl, QTimer, QItemSelectionModel, QAbstractTableModel, Qt
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QMovie, QDesktopServices
-from PyQt5.QtWidgets import QHeaderView, QInputDialog, QTreeView, QToolTip, QApplication
+from PyQt5.QtWidgets import QHeaderView, QInputDialog, QTreeView, QToolTip, QApplication, QSplashScreen, \
+    QStyledItemDelegate
 
 import inet_test
 from Price_Window import Ui_Form
@@ -28,8 +31,31 @@ global datas
 global sorting
 
 
+class MyTableModel(QAbstractTableModel):
+    def __init__(self, data):
+        super().__init__()
+        self._data = data
+
+    def rowCount(self, parent=QModelIndex()):
+        return len(self._data)
+
+    def columnCount(self, parent=QModelIndex()):
+        return len(self._data[0])
+
+    def data(self, index, role=Qt.DisplayRole):
+        if role == Qt.DisplayRole:
+            row = self._data[index.row()]
+            if index.column() < len(row):
+                return row[index.column()]
+
+    def headerData(self, section, orientation, role=Qt.DisplayRole):
+        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
+            return f"{section + 1}"
+
+
 class CustomSortModel(QtCore.QSortFilterProxyModel):
     global sorting
+
     def lessThan(self, left, right):
         # Сортувати як числа колонки (індекс 2 та 0)
         if sorting:
@@ -49,8 +75,13 @@ class CustomSortModel(QtCore.QSortFilterProxyModel):
 class MyWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
+        self.splash = QSplashScreen(QPixmap('images/start.png'))
+        self.splash.show()
+        self.splash.showMessage("...", Qt.AlignBottom | Qt.AlignHCenter, Qt.white)
+        self.splash.showMessage("Створення головного вікна...", Qt.AlignBottom | Qt.AlignHCenter, Qt.white)
         global sorting
         sorting = True
+
         # Create a bold_font
         bold_font = QtGui.QFont()
         bold_font.setBold(True)
@@ -129,11 +160,12 @@ class MyWindow(QtWidgets.QWidget):
 
         # Create a pushButton-s
         self.ui.pushButton.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(self.ui.pushButton.text())))
+        self.ui.pushButton_Past.clicked.connect(self.paste_clipboard)
 
         # -------------------Global-------------------------
+        global datas
         global full_model, custom_model, null_model
         global full_category, custom_category
-        global datas
 
         # -------------------мій функціонал-------------------------
 
@@ -154,6 +186,33 @@ class MyWindow(QtWidgets.QWidget):
         self.ui.treeView_2.model().dataChanged.connect(self.on_treeView_2_Changed)
         self.ui.treeView_2.model().rowsInserted.connect(self.on_treeView_2_Changed)  # додайте цей рядок
         self.ui.treeView_2.model().rowsRemoved.connect(self.on_treeView_2_Changed)
+
+    def paste_clipboard(self):
+        data = pyperclip.paste()
+        # перевірка наявності данних у self._data якщо self.data == '' або data == \\r\\n то вважаєм що данних нема
+        if data == '' or data == '\r\n':
+            data = 'У буфері обміну відсутні данні\r\nСкопіюйте таблицю яку хочете тут розмістити'
+        rows = data.split('\r\n')
+        rows = [row.split('\t') for row in rows]
+        model = MyTableModel(rows)
+        view = self.ui.treeView_3
+        view.setModel(model)
+        # view to check style sheet
+        # Встановлюємо делегат для дерева QTreeView
+        view.setItemDelegateForColumn(0, QStyledItemDelegate(view))
+        # Встановлюємо стиль для дерева QTreeView
+        view.setStyleSheet('''
+            QTreeView::indicator:checked {
+                image: url(images/check.png);
+            }
+        ''')
+        view.setSelectionMode(QTreeView.MultiSelection)
+        view.setEditTriggers(QTreeView.DoubleClicked)
+        view.setColumnWidth(0, 260)
+        view.setColumnWidth(1, 30)
+        view.setColumnWidth(2, 20)
+        view.setColumnWidth(4, 20)
+        view.show()
 
     def label_count(self):
         self.ui.label.setText('Знайдено: ' + str(self.ui.treeView.model().rowCount()))
@@ -197,6 +256,7 @@ class MyWindow(QtWidgets.QWidget):
 
     def create_me_model(self, me_data):
         # Створення моделі
+        self.splash.showMessage("Створення моделі...", Qt.AlignBottom | Qt.AlignHCenter, Qt.white)
         me_model = QStandardItemModel()
         # Встановлення заголовків стовпців
         keys = ['Article', 'Name', 'Price', 'Unit', 'Category']
@@ -214,6 +274,7 @@ class MyWindow(QtWidgets.QWidget):
 
     def treeView_set_model(self, tree_view, me_model):
         # -----------Встановлюємо заголовки стовпців---------------------------------------------------------------
+        self.splash.showMessage("Наповнення моделі...", Qt.AlignBottom | Qt.AlignHCenter, Qt.white)
         tree_view.setModel(me_model)
         header = tree_view.header()
         header.resizeSection(0, 80)
@@ -263,7 +324,7 @@ class MyWindow(QtWidgets.QWidget):
             if ok_pressed:  # перевірка, чи було натиснуто кнопку "ОК" у діалоговому вікні
                 kol = int(count_me_dialog)
                 price = float(row_data[-3].text())
-                rez = round(kol*price,2)
+                rez = round(kol * price, 2)
                 row_data[-1] = QStandardItem(
                     str(kol))  # заміна значення останнього стовпця на введену кількість
                 row_data[-2] = QStandardItem(str(rez))
@@ -281,7 +342,7 @@ class MyWindow(QtWidgets.QWidget):
                 value = model.data(index)
                 sum += float(value)
             print(sum)  # print the sum of the column
-            self.ui.label_summ.setText('Сума: ' + str(round(sum,2)))
+            self.ui.label_summ.setText('Сума: ' + str(round(sum, 2)))
         except:
             self.ui.label_summ.setText('Сума:______')
 
@@ -329,14 +390,14 @@ class MyWindow(QtWidgets.QWidget):
         count_me_dialog, ok_pressed = QInputDialog.getInt(
             QtWidgets.QWidget(), "Кількість", "Введіть кількість:", value=int(kol))
         if ok_pressed:
-            sorting=False
+            sorting = False
             model.setData(model.index(row, 4), count_me_dialog)
             kol = int(count_me_dialog)
             price = float(model.data(model.index(row, 2)))
             rez = round(kol * price, 2)
             model.setData(model.index(row, 3), rez)
             self.ui.treeView_2.update()
-            sorting=True
+            sorting = True
 
     def custom_price_save(self):
         global datas
@@ -443,8 +504,10 @@ class MyWindow(QtWidgets.QWidget):
         if updt:
             load_update()
 
+
 # Create the application and show the main window
 app = QtWidgets.QApplication([])
 window = MyWindow()
 window.show()
+window.splash.close()
 app.exec_()
