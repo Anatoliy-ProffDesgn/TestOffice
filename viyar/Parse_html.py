@@ -1,8 +1,7 @@
 # створено спираючись на інструкцію із https://python-scripts.com/beautifulsoup-html-parsing
 import sys
 
-# import requests
-# from PyInstaller.isolated._parent import child
+from PyQt5.QtGui import QStandardItem
 from bs4 import BeautifulSoup
 from AllFile_inDir import get_file as get_file_list
 
@@ -45,7 +44,7 @@ global item_load
 
 
 # -----------перебираєм всі файли прайсів у теці, збираєм повний прайс-------------
-def full_price(dir_name):
+def full_price(dir_name, view):
     global count_load
     global item_load
     files_list = get_file_list(dir_name, 'price', 'html')
@@ -53,17 +52,25 @@ def full_price(dir_name):
     # item_load = 0
     price = []
     for file in files_list:
+
         try:
             tmp_price = price_pars(file)
         except Exception:
             print(sys.exc_info()[1])
+            info_to_view(view, 'Помилка при парсингу файлу ' + file)
         else:
             for p in tmp_price:
                 price.append(p)
+            info_to_view(view, 'Успіх парсинг ' + file )
         # item_load += 1
     return price
 
-
+def info_to_view(view, info_dict):
+    model = view.model()
+    item1 = QStandardItem(info_dict)
+    model.appendRow(item1)
+    view.setModel(model)
+    view.show()
 # ------------Тест-----------------
 # # rez1 = price_pars(f_name)
 # # print(rez1)

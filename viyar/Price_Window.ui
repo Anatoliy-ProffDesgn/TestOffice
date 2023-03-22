@@ -17,7 +17,8 @@
    <string>Прайс</string>
   </property>
   <property name="windowIcon">
-   <iconset theme="E:\TestOffice\viyar\images\ico.png"/>
+   <iconset theme="E:\TestOffice\viyar\images\ico.png">
+    <normaloff>.</normaloff>.</iconset>
   </property>
   <widget class="QWidget" name="gridLayoutWidget">
    <property name="geometry">

@@ -1,12 +1,14 @@
 import csv
 import datetime
 import os
-
+import threading
+from tkinter import *
+from PIL import Image, ImageTk
 import pyperclip
 from PyQt5 import QtWidgets, QtGui, QtCore, Qt
 from PyQt5.QtCore import QStringListModel, QModelIndex, QUrl, QAbstractTableModel, Qt
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QDesktopServices
-from PyQt5.QtWidgets import QInputDialog, QTreeView, QSplashScreen, QStyledItemDelegate
+from PyQt5.QtWidgets import QInputDialog, QTreeView, QSplashScreen, QStyledItemDelegate, QFileDialog
 
 import Images as img
 import img_window as img_w
@@ -106,43 +108,43 @@ class MyWindow(QtWidgets.QWidget):
 
         # Create a context_menu
         self.context_menu = QtWidgets.QMenu(self)
-        self.context_menu.addAction("Додати до замовлення", self.add_row_to_treeview_2).setFont(bold_font)
+        self.context_menu.addAction(QtGui.QIcon("images/icons/add_96px.png"), "Замовити",
+                                    self.add_row_to_treeview_2).setFont(bold_font)
         self.context_menu.addSeparator()
-        self.context_menu.addAction(QtGui.QIcon("icons/del.png"),
-                                    "Видалити", self.del_select_row)
-        self.context_menu.addSeparator().setText('111')
-        self.context_menu.addAction("Повний прайс", self.full_price_triggered)
-        self.context_menu.addAction("Мій прайс", self.custom_price_triggered)
+        self.context_menu.addAction(QtGui.QIcon("images/icons/del_96px.png"), "Видалити", self.del_select_row)
         self.context_menu.addSeparator()
-        self.context_menu.addAction(QtGui.QIcon("icons/re_save.png"),
-                                    "Зберегти як мій прайс (!Увага заміна!)", self.custom_price_resave)
-        self.context_menu.addAction(QtGui.QIcon("icons/add_save.png"),
-                                    "Додати у мій прайс", self.custom_price_save)
+        self.context_menu.addAction(QtGui.QIcon("images/icons/full_list_96px.png"), "Повний прайс",
+                                    self.full_price_triggered)
+        self.context_menu.addAction(QtGui.QIcon("images/icons/me_list_96px.png"), "Мій прайс",
+                                    self.custom_price_triggered)
         self.context_menu.addSeparator()
-        self.context_menu.addAction("Оновити прайс", lambda: self.update_price(True))
+        self.context_menu.addAction(QtGui.QIcon("images/icons/save_as_96px.png"), "Замінити мій прайс",
+                                    self.custom_price_resave)
+        self.context_menu.addAction(QtGui.QIcon("images/icons/save_96px.png"), "Додати у мій прайс",
+                                    self.custom_price_save)
+        self.context_menu.addSeparator()
+        self.context_menu.addAction(QtGui.QIcon("images/icons/update_96px.png"), "Оновити прайс",
+                                    lambda: self.update_price(True))
         # self.context_menu.addAction("Оновити прайс", partial(self.update_price, True))
         self.ui.treeView.customContextMenuRequested.connect(self.show_context_menu)
 
         # Create a context_menu_2
         self.context_menu_2 = QtWidgets.QMenu(self)
-        self.context_menu_2.addAction(QtGui.QIcon("icons/edit.png"),
-                                      "Змінити кількість", self.on_action_kol_triggered).setFont(bold_font)
+        self.context_menu_2.addAction(QtGui.QIcon("images/icons/to_add_96px.png"), "Змінити кількість",
+                                      self.on_action_kol_triggered).setFont(bold_font)
         self.context_menu_2.addSeparator()
-        self.context_menu_2.addAction(QtGui.QIcon("icons/del.png"),
-                                      "Видалити", self.del2_select_row)
-        self.context_menu_2.addAction(QtGui.QIcon("icons/clear.png"),
-                                      "Очистити все", self.del_all_row)
+        self.context_menu_2.addAction(QtGui.QIcon("images/icons/del_96px.png"), "Видалити", self.del2_select_row)
+        self.context_menu_2.addAction(QtGui.QIcon("images/icons/clear_96px.png"), "Очистити все", self.del_all_row)
         self.context_menu_2.addSeparator()
-        self.context_menu_2.addAction(QtGui.QIcon("icons/re_save.png"),
-                                      "Переписати мій прайс (!Увага заміна!)", self.custom_price2_resave)
+        self.context_menu_2.addAction(QtGui.QIcon("images/icons/save_as_96px.png"), "Замінити мій прайс",
+                                      self.custom_price2_resave)
+        self.context_menu_2.addAction(QtGui.QIcon("images/icons/save_96px.png"), "Додати у мій прайс",
+                                      self.custom_price2_save)
         self.context_menu_2.addSeparator()
-        self.context_menu_2.addAction(QtGui.QIcon("icons/add_save.png"),
-                                      "Додати у мій прайс", self.custom_price2_save)
-        self.context_menu_2.addSeparator()
-        self.context_menu_2.addAction(QtGui.QIcon("icons/csv_load.png"),
-                                      "Завантажити .csv", self.del_select_row).setEnabled(False)
-        self.context_menu_2.addAction(QtGui.QIcon("icons/csv_save.png"),
-                                      "Зберегти .csv(для імпорту на Віяр)", self.save_to_csv).setFont(bold_font)
+        self.context_menu_2.addAction(QtGui.QIcon("images/icons/export_csv_96px.png"), "Завантажити .csv",
+                                      self.open_csv)
+        self.context_menu_2.addAction(QtGui.QIcon("images/icons/save_csv_96px.png"), "Зберегти для Віяру *.csv",
+                                      self.save_to_csv).setFont(bold_font)
         self.ui.treeView_2.customContextMenuRequested.connect(self.show_context_menu_2)
 
         # Create a lineEdit-s
@@ -235,6 +237,7 @@ class MyWindow(QtWidgets.QWidget):
                 row_index = model.index(row, 0)  # Отримати індекс рядка
                 self.ui.treeView.selectionModel().select(row_index,
                                                          QtCore.QItemSelectionModel.ClearAndSelect)  # Виділити рядок
+                self.ui.treeView.scrollTo(row_index, QtWidgets.QAbstractItemView.EnsureVisible)
                 break
 
     def on_tree_view_double_clicked(self, index: QModelIndex):
@@ -381,6 +384,9 @@ class MyWindow(QtWidgets.QWidget):
         model = self.ui.treeView_2.model()
         row = self.ui.treeView_2.currentIndex().row()
         kol = model.data(model.index(row, 4))
+        if kol is None:
+            return
+
         count_me_dialog, ok_pressed = QInputDialog.getInt(
             QtWidgets.QWidget(), "Кількість", "Введіть кількість:", value=int(kol))
         if ok_pressed:
@@ -426,8 +432,20 @@ class MyWindow(QtWidgets.QWidget):
         column = header.sortIndicatorSection()
         order = header.sortIndicatorOrder()
         self.ui.treeView.setSortingEnabled(False)
-        min_price = float(self.ui.lineEdit_min.text()) if self.ui.lineEdit_min.text() else 0
-        max_price = float(self.ui.lineEdit_max.text()) if self.ui.lineEdit_max.text() != '0' else float(10 ** 22)
+        # min_price = float(self.ui.lineEdit_min.text()) if self.ui.lineEdit_min.text() else 0
+        # max_price = float(self.ui.lineEdit_max.text()) if self.ui.lineEdit_max.text() != '0' else float(10 ** 22)
+        try:
+            min_price = float(self.ui.lineEdit_min.text())
+        except:
+            self.ui.lineEdit_min.setText('0')
+            min_price = float(0)
+        try:
+            max_price = float(self.ui.lineEdit_max.text())
+            if max_price == 0:
+                max_price = float(10 ** 22)
+        except:
+            self.ui.lineEdit_max.setText('0')
+            max_price = float(10 ** 22)
         data_price = list(filter(lambda x: min_price <= float(x['Price']) <= max_price, datas))
         txt = self.ui.lineEdit_SearchArt.text()
         if len(txt) > 1:
@@ -458,6 +476,56 @@ class MyWindow(QtWidgets.QWidget):
             self.ui.treeView.show()
             self.ui.treeView.setSortingEnabled(True)
             self.ui.treeView.sortByColumn(column, order)
+    def open_csv(self):
+        global datas
+        # відкриємо файл за допомогою діалога з запитом на файл .csv за вказаним розміщенням /temp/
+        fname = QFileDialog.getOpenFileName(self, 'Open file', './temp/', "CSV files (*.csv)")
+        if fname[0]:
+            with open(fname[0], 'r') as f:
+                reader = csv.reader(f)
+                data = list(reader)
+            new_data = []
+            for item in data:
+                art = item[0].split(';')
+            # datas = ... [{'Article': '83093', 'Name': 'Полиця для паперу одинарна хром', 'Price': '300.42', 'Unit': 'грн/шт', 'Category': 'Релінги і комплектуючі'}, ...]
+            #  збережем в new_data рядкі  з datas якшо article == art
+                for row in datas:
+                    if row['Article'] == art[0]:
+                        data_tmp = row
+                        if data_tmp:
+                            data_tmp['Category'] = art[1]
+                            data_tmp['Unit'] = float(data_tmp['Price']) * float(data_tmp['Category'])
+                            new_data.append(data_tmp)
+                            break
+            for s in new_data:
+                print(s)
+            # додаємо дані в модель treeView_2
+            # model2 = self.ui.treeView_2.model()
+
+            model2 = null_model
+            for row in new_data:
+                r = []
+                r.append(QStandardItem(str(row['Article'])))
+                r.append(QStandardItem(str(row['Name'])))
+                r.append(QStandardItem(str(row['Price'])))
+                r.append(QStandardItem(str(row['Unit'])))
+                r.append(QStandardItem(str(row['Category'])))
+                model2.appendRow(r)
+
+            # for data in me_data:
+            #     row = []
+            #     for key in keys:
+            #         item = QStandardItem(str(data.get(key, '')))
+            #         row.append(item)
+            #     me_model.appendRow(row)
+            # return me_model
+
+            self.ui.treeView_2.setModel(model2)
+            self.ui.treeView_2.update()
+            # try:
+            # except:
+            #     pass
+
 
     def save_to_csv(self):
         # Відкрити діалогове вікно для вибору шляху до файлу
@@ -496,7 +564,54 @@ class MyWindow(QtWidgets.QWidget):
 
     def update_price(self, updt=False):
         if updt:
-            load_update()
+            # Запуск вікна та виконання процесів
+            model = QStandardItemModel()
+            item1 = QStandardItem('Оновлення прайсу')
+            model.appendRow(item1)
+            self.ui.treeView_3.setModel(model)
+            self.ui.treeView_3.show()
+            p = create_window(self.ui.treeView_3)
+            p.destroy()
+            # p1 = threading.Thread(target=load_update(self.ui.treeView_3))
+            # p1.start()
+            # p.start()
+            # load_update(view=self.ui.treeView_3)
+            # p1.join()
+            # p.join()
+
+
+def create_window(view):
+    root = Tk()
+    # Завантаження анімаційного файлу
+    image = Image.open('images/load.gif')
+    photo = ImageTk.PhotoImage(image)
+    # Створення вікна та додавання до нього анімаційного файлу
+    label = Label(root, image=photo, background='gray')
+    label.pack()
+    label2 = Label(root, text='Оновлення прайсу.\n(може тривати декілька хвилин)',
+                   foreground='white',
+                   background='gray',
+                   font=(None, 8, 'bold'))
+    label2.pack()
+    root.configure(background='gray')
+    # Визначаємо розміри вікна та його розміщення в центрі екрану
+    root.geometry("+{}+{}".format(int(root.winfo_screenwidth() / 2 - root.winfo_reqwidth() / 2),
+                                  int(root.winfo_screenheight() / 2 - root.winfo_reqheight() / 2)))
+    # Встановлюємо передній план для вікна
+    root.lift()
+    root.wm_attributes('-topmost', 1)
+    # root.mainloop()
+    root.overrideredirect(True)
+    root.update()
+    update_image(label, photo)
+    load_update(view)
+    return root
+
+
+def update_image(label, image):
+    # Запустити анімацію
+    label.config(image=image)
+    label.after(100, update_image)
 
 
 # Create the application and show the main window

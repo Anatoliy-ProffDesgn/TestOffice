@@ -1,3 +1,5 @@
+from PyQt5.QtGui import QStandardItem
+
 from LoadURL import FileUrl_Load as load_file_in_url
 import concurrent.futures
 
@@ -17,15 +19,26 @@ import concurrent.futures
 #         print('newPrice' + str(i) + '.xls', ' - Завантажено')
 
 
-def download_price(urls):
+def download_price(urls, view):
     with concurrent.futures.ThreadPoolExecutor() as executor:
         future_to_url = {executor.submit(load_file_in_url, url, f"newPrice{i}.html"): url for i, url in
                          enumerate(urls, 1)}
         for future in concurrent.futures.as_completed(future_to_url):
             url = future_to_url[future]
+
             try:
                 future.result()
             except Exception as exc:
                 print(f'Помилка завантаження URL {url}: {exc}')
+                info_to_view(view, f'Помилка завантаження URL  {url}: {exc}')
             else:
                 print(f'Файл для {url} успішно завантажено')
+                info_to_view(view, f'Успішно завантажено {url}')
+
+
+def info_to_view(view, info_dict):
+    model = view.model()
+    item1 = QStandardItem(info_dict)
+    model.appendRow(item1)
+    view.setModel(model)
+    view.show()
