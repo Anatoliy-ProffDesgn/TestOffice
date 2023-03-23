@@ -8,7 +8,7 @@ import pyperclip
 from PyQt5 import QtWidgets, QtGui, QtCore, Qt
 from PyQt5.QtCore import QStringListModel, QModelIndex, QUrl, QAbstractTableModel, Qt
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QDesktopServices
-from PyQt5.QtWidgets import QInputDialog, QTreeView, QSplashScreen, QStyledItemDelegate, QFileDialog
+from PyQt5.QtWidgets import QInputDialog, QTreeView, QSplashScreen, QStyledItemDelegate, QFileDialog, QDesktopWidget
 
 import Images as img
 import img_window as img_w
@@ -71,10 +71,14 @@ class CustomSortModel(QtCore.QSortFilterProxyModel):
 class MyWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
-        self.splash = QSplashScreen(QPixmap('images/start.png'))
+        pix = QPixmap('images/start.png')
+        h = int(pix.height()//3)  # отримаємо висоту вікна і ширину splash
+        w = int(pix.width()//3)
+        pix = pix.scaled(w, h)  # змінимо розміри зображення
+        self.splash = QSplashScreen(pix)
         self.splash.show()
-        self.splash.showMessage("...", Qt.AlignBottom | Qt.AlignHCenter, Qt.white)
-        self.splash.showMessage("Створення головного вікна...", Qt.AlignBottom | Qt.AlignHCenter, Qt.white)
+        self.splash.showMessage("ProffДизайн +38(098)926-05-05\n\n\n\n...", Qt.AlignBottom | Qt.AlignHCenter, Qt.white)
+        self.splash.showMessage("ProffДизайн +38(098)926-05-05\n\n\n\nСтворення головного вікна...", Qt.AlignBottom | Qt.AlignHCenter, Qt.white)
         global sorting
         sorting = True
 
@@ -168,7 +172,8 @@ class MyWindow(QtWidgets.QWidget):
         self.img_window = None  # define img_window as an instance variable
         me_data = open_price()
         price_name = me_data[1][0]
-        self.setWindowTitle(price_name)
+        price_name = price_name.split('/')[-1].split('.')[0]
+        self.setWindowTitle('ProffДизайн  |  +38(098)926-05-05  |  ' + price_name)
         full_model = self.create_me_model(me_data[0])
         full_category = self.create_category(me_data[0])
         null_model = self.create_me_model([])
@@ -253,7 +258,7 @@ class MyWindow(QtWidgets.QWidget):
 
     def create_me_model(self, me_data):
         # Створення моделі
-        self.splash.showMessage("Створення моделі...", Qt.AlignBottom | Qt.AlignHCenter, Qt.white)
+        self.splash.showMessage("ProffДизайн +38(098)926-05-05\n\n\n\nСтворення моделі...", Qt.AlignBottom | Qt.AlignHCenter, Qt.white)
         me_model = QStandardItemModel()
         # Встановлення заголовків стовпців
         keys = ['Article', 'Name', 'Price', 'Unit', 'Category']
@@ -271,7 +276,7 @@ class MyWindow(QtWidgets.QWidget):
 
     def treeView_set_model(self, tree_view, me_model):
         # -----------Встановлюємо заголовки стовпців---------------------------------------------------------------
-        self.splash.showMessage("Наповнення моделі...", Qt.AlignBottom | Qt.AlignHCenter, Qt.white)
+        self.splash.showMessage("ProffДизайн +38(098)926-05-05\n\n\n\nНаповнення моделі...", Qt.AlignBottom | Qt.AlignHCenter, Qt.white)
         tree_view.setModel(me_model)
         header = tree_view.header()
         header.resizeSection(0, 80)
@@ -476,6 +481,7 @@ class MyWindow(QtWidgets.QWidget):
             self.ui.treeView.show()
             self.ui.treeView.setSortingEnabled(True)
             self.ui.treeView.sortByColumn(column, order)
+
     def open_csv(self):
         global datas
         # відкриємо файл за допомогою діалога з запитом на файл .csv за вказаним розміщенням /temp/
@@ -487,8 +493,8 @@ class MyWindow(QtWidgets.QWidget):
             new_data = []
             for item in data:
                 art = item[0].split(';')
-            # datas = ... [{'Article': '83093', 'Name': 'Полиця для паперу одинарна хром', 'Price': '300.42', 'Unit': 'грн/шт', 'Category': 'Релінги і комплектуючі'}, ...]
-            #  збережем в new_data рядкі  з datas якшо article == art
+                # datas = ... [{'Article': '83093', 'Name': 'Полиця для паперу одинарна хром', 'Price': '300.42', 'Unit': 'грн/шт', 'Category': 'Релінги і комплектуючі'}, ...]
+                #  збережем в new_data рядкі  з datas якшо article == art
                 for row in datas:
                     if row['Article'] == art[0]:
                         data_tmp = row
@@ -497,11 +503,6 @@ class MyWindow(QtWidgets.QWidget):
                             data_tmp['Unit'] = float(data_tmp['Price']) * float(data_tmp['Category'])
                             new_data.append(data_tmp)
                             break
-            for s in new_data:
-                print(s)
-            # додаємо дані в модель treeView_2
-            # model2 = self.ui.treeView_2.model()
-
             model2 = null_model
             for row in new_data:
                 r = []
@@ -511,21 +512,8 @@ class MyWindow(QtWidgets.QWidget):
                 r.append(QStandardItem(str(row['Unit'])))
                 r.append(QStandardItem(str(row['Category'])))
                 model2.appendRow(r)
-
-            # for data in me_data:
-            #     row = []
-            #     for key in keys:
-            #         item = QStandardItem(str(data.get(key, '')))
-            #         row.append(item)
-            #     me_model.appendRow(row)
-            # return me_model
-
             self.ui.treeView_2.setModel(model2)
             self.ui.treeView_2.update()
-            # try:
-            # except:
-            #     pass
-
 
     def save_to_csv(self):
         # Відкрити діалогове вікно для вибору шляху до файлу
@@ -609,12 +597,14 @@ def create_window(view):
 
 
 def update_image(label, image):
-    # Запустити анімацію
+    # Запустити gif анімацію
+    label.after(100, update_image, label, image)
     label.config(image=image)
-    label.after(100, update_image)
+    label.image = image
+    # label.after(100, update_image)
 
 
-# Create the application and show the main window
+
 app = QtWidgets.QApplication([])
 window = MyWindow()
 window.show()
