@@ -188,6 +188,7 @@ class MyWindow(QtWidgets.QWidget):
         self.ui.treeView_2.model().rowsInserted.connect(self.on_treeView_2_Changed)  # додайте цей рядок
         self.ui.treeView_2.model().rowsRemoved.connect(self.on_treeView_2_Changed)
 
+
     def paste_clipboard(self):
         data = pyperclip.paste()
         # перевірка наявності данних у self._data якщо self.data == '' або data == \\r\\n то вважаєм що данних нема
@@ -334,7 +335,28 @@ class MyWindow(QtWidgets.QWidget):
                 parent_item = null_model.invisibleRootItem()  # отримання кореневого елемента дерева
                 parent_item.appendRow(row_data)  # додавання нового рядка до дерева
 
+    def dublicate_remove(self):
+        model = self.ui.treeView_2.model()
+        for row in range(model.rowCount()):
+            item = model.index(row, 0)
+            kol_item=model.index(row, model.columnCount() - 1)
+             # ззворотнім перебором починаючи з останнього елемента у treeView_2.model() знаходим дублікати в моделі й видаляємо їх
+            for i in range(row + 1, model.rowCount()):
+                item_2 = model.index(i, 0)
+                if item.data() == item_2.data():
+                    kol1 = int(model.data(model.index(row, model.columnCount() - 1)))
+                    kol2 = int(model.data(model.index(i, model.columnCount() - 1)))
+                    sum=str(kol1+kol2)
+                    tmp=kol_item.data()
+                    model.removeRow(i)
+                    model.setData(kol_item, sum)
+                    self.ui.treeView_2.update()
+
+    update_summ def
+
+
     def on_treeView_2_Changed(self):
+        self.dublicate_remove()
         try:
             model = self.ui.treeView_2.model()
             column = model.columnCount() - 2  # get the second last column
@@ -347,6 +369,7 @@ class MyWindow(QtWidgets.QWidget):
             self.ui.label_summ.setText('Сума: ' + str(round(sum, 2)))
         except:
             self.ui.label_summ.setText('Сума:______')
+
 
     def del_select_row(self):
         selection_model = self.ui.treeView.selectionModel()  # Отримати вибрану модель виділень
@@ -514,6 +537,9 @@ class MyWindow(QtWidgets.QWidget):
                 model2.appendRow(r)
             self.ui.treeView_2.setModel(model2)
             self.ui.treeView_2.update()
+            self.ui.treeView_2.model().dataChanged.connect(self.on_treeView_2_Changed)
+            self.ui.treeView_2.model().rowsInserted.connect(self.on_treeView_2_Changed)  # додайте цей рядок
+            self.ui.treeView_2.model().rowsRemoved.connect(self.on_treeView_2_Changed)
 
     def save_to_csv(self):
         # Відкрити діалогове вікно для вибору шляху до файлу
