@@ -72,13 +72,13 @@ class MyWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
         pix = QPixmap('images/start.png')
-        h = int(pix.height()//3)  # отримаємо висоту вікна і ширину splash
-        w = int(pix.width()//3)
+        h = int(pix.height())  # отримаємо висоту вікна і ширину splash
+        w = int(pix.width())
         pix = pix.scaled(w, h)  # змінимо розміри зображення
         self.splash = QSplashScreen(pix)
         self.splash.show()
-        self.splash.showMessage("ProffДизайн +38(098)926-05-05\n\n\n\n...", Qt.AlignBottom | Qt.AlignHCenter, Qt.white)
-        self.splash.showMessage("ProffДизайн +38(098)926-05-05\n\n\n\nСтворення головного вікна...", Qt.AlignBottom | Qt.AlignHCenter, Qt.white)
+        self.splash.showMessage("ProffДизайн +38(098)926-05-05\n\n\n\n\n...", Qt.AlignBottom | Qt.AlignHCenter, Qt.white)
+        self.splash.showMessage("ProffДизайн +38(098)926-05-05\n\n\n\n\nСтворення головного вікна...", Qt.AlignBottom | Qt.AlignHCenter, Qt.white)
         global sorting
         sorting = True
 
@@ -259,7 +259,7 @@ class MyWindow(QtWidgets.QWidget):
 
     def create_me_model(self, me_data):
         # Створення моделі
-        self.splash.showMessage("ProffДизайн +38(098)926-05-05\n\n\n\nСтворення моделі...", Qt.AlignBottom | Qt.AlignHCenter, Qt.white)
+        self.splash.showMessage("ProffДизайн +38(098)926-05-05\n\n\n\n\nСтворення моделі...", Qt.AlignBottom | Qt.AlignHCenter, Qt.white)
         me_model = QStandardItemModel()
         # Встановлення заголовків стовпців
         keys = ['Article', 'Name', 'Price', 'Unit', 'Category']
@@ -277,7 +277,7 @@ class MyWindow(QtWidgets.QWidget):
 
     def treeView_set_model(self, tree_view, me_model):
         # -----------Встановлюємо заголовки стовпців---------------------------------------------------------------
-        self.splash.showMessage("ProffДизайн +38(098)926-05-05\n\n\n\nНаповнення моделі...", Qt.AlignBottom | Qt.AlignHCenter, Qt.white)
+        self.splash.showMessage("ProffДизайн +38(098)926-05-05\n\n\n\n\nНаповнення моделі...", Qt.AlignBottom | Qt.AlignHCenter, Qt.white)
         tree_view.setModel(me_model)
         header = tree_view.header()
         header.resizeSection(0, 80)
@@ -352,7 +352,7 @@ class MyWindow(QtWidgets.QWidget):
                     model.setData(kol_item, sum)
                     self.ui.treeView_2.update()
 
-    update_summ def
+    # update_summ def
 
 
     def on_treeView_2_Changed(self):
