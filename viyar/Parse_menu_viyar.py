@@ -1,4 +1,5 @@
 import threading
+from threading import Lock
 import requests
 from bs4 import BeautifulSoup
 import random
@@ -32,8 +33,16 @@ def me_print(lst):
     # input('Натисніть клавішу для завершення')
 
 
+lock = Lock()
+
+
+def me_print_process(me_str):
+    with lock:
+        print(me_str)
+
+
 def me_parse_menu():
-    t=time.time()
+    t = time.time()
     if not inet_test.is_internet_available():
         return None
     print('____________Отримуэмо доступ до сайту____________')
@@ -54,6 +63,8 @@ def me_parse_menu():
         # print(f' {i}', name_lev1, '||', link_lev1)
         # Отримуємо всі dropdown-елементи рівня 2 та їхні назви та посилання
         items_lev2 = item.find_all("li", {"class": "dropdown__list-item li_lev2"})
+        # if len(items_lev2) == 0:
+        #     items_lev2 = item.find_all("li", {"class": "dropdown__list-item lastLevel-item"})
         lst.append(create_dct(name_lev1, name_lev1, link_lev1)) if len(items_lev2) == 0 else None
         j = 0
         for item2 in items_lev2:
@@ -86,32 +97,6 @@ def me_parse_menu():
     return list_load_link
 
 
-# def me_parse_load_link(lst):
-#     if lst is None:
-#         return None
-#     url = "https://viyar.ua/"
-#     new_lst = []
-#     for item in lst:
-#         print(item['cat'], '|', item['rozdil'])
-#         if url in item['link']:
-#             response = requests.get(item['link'], headers={'User-Agent': random.choice(ua)})
-#             soup = BeautifulSoup(response.text, "html.parser")
-#             buttons = soup.find("a", {"class": "button button--transparent"})
-#             pprint(buttons)
-#             # load_link = buttons.find("a")["href"]
-#             try:
-#                 load_link = buttons.get("href")
-#                 # dropdown = soup.find_all("li", {"class": "dropdown__list-item_lev1"})
-#                 load_link = url + load_link[1:] if load_link[0] == '/' else url + load_link
-#                 d = create_dct(item['cat'], item['rozdil'], load_link)
-#                 new_lst.append(d)
-#                 print('Отримано:', load_link)
-#             except:
-#                 pass
-#                 print('_______None link_______', item['link'])
-#     return new_lst
-
-
 def process_item(item, url):
     # print(item['cat'], '|', item['rozdil'])
     if url in item['link']:
@@ -123,12 +108,12 @@ def process_item(item, url):
             load_link = buttons.get("href")
             load_link = url + load_link[1:] if load_link[0] == '/' else url + load_link
             d = create_dct(item['cat'], item['rozdil'], load_link)
-            str_rez = str(f'Отримано: {load_link} -> {item["cat"]} | {item["rozdil"]}\n')
-            print(str_rez)
+            # str_rez = str(f'Отримано: {load_link} -> {item["cat"]} | {item["rozdil"]}\n')
+            me_print_process(f'Отримано: {load_link} -> {item["cat"]} | {item["rozdil"]}')
             return d
         except:
+            me_print_process(f'_______None link_______: {item["link"]} -> {item["cat"]} | {item["rozdil"]}')
             pass
-            print('_______None link_______', item['link'])
     return None
 
 
@@ -150,4 +135,7 @@ def me_parse_load_link(lst):
 if __name__ == '__main__':
     lst = me_parse_menu()
     # me_print(lst)
+    print(lst)
     print(len(lst))
+
+# [{'cat': 'Плитні матеріали', 'rozdil': 'ДСП | Cleaf', 'link': 'https://viyar.ua/excel_export/?id=2483&to_xls=Y&lang=ua'}, ...]
