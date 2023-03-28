@@ -165,9 +165,9 @@ def price_pars(soup, row):
             else:
                 subcat = [row['rozdil'], row['rozdil']]
             # (article, name, price, quality, category, subcategory, subsubcategory, image, )
-            d_rez = {'article': tmp[0],
+            d_rez = {'article': int(tmp[0]),
                      'name': tmp[1],
-                     'price': tmp[2],
+                     'price': float(tmp[2]),
                      'quality': tmp[3],
                      'category': row['cat'],
                      'subcategory': subcat[0],
@@ -175,8 +175,10 @@ def price_pars(soup, row):
                      'image': None,
                      'data': None}
             rez.append(d_rez)
-        for r in rez:
-            me_db.insert_into_price('price_26_03_2023', r)
+        # for r in rez:
+        #     me_db.insert_into_price('price_26_03_2023', r)
+    else:
+        return None
     return rez
 
 def download_and_parse(row):
@@ -212,22 +214,38 @@ def handle_error(e):
 def update_full_prise():
     t=dt.now()
     me_db = db.DataBase('DataBase.db')
-    rows = me_db.select_from_table('log_update_26_03_2023')
+    name_table = f'price_{dt.today().strftime("%d_%m_%Y")}'
+    url_table = 'log_update_26_03_2023'
+    rows = me_db.select_from_table(url_table)
+    # rows = [me_db.select_row_by_id(url_table, 10)]
     # зберігаємо функцію download_and_parse з фіксованим аргументом row
+    # print(rows)
     download_and_parse_row = partial(download_and_parse)
     num_processors = mp.cpu_count()
-    # print(rows)
+    # print(list(rows[0]))
+    if me_db.table_exists(name_table):
+        me_db.delete_table(name_table)
     for row in rows:
-        with mp.Pool(3) as pool:
+        with mp.Pool(num_processors) as pool:
+            results = []
             # виконання download_and_parse_row для кожного рядка з бази даних у окремому процесі
             # обробка помилок викликає функцію handle_error
             dict_row = dict(row)
             print(format_time(t), 'Новий поцес')
             # print(f"Number of active processes: {len(mp.active_children())}")
-            pool.apply_async(download_and_parse_row, (dict_row,), error_callback=handle_error)
+            result = pool.apply_async(download_and_parse_row, (dict_row,), error_callback=handle_error)
+            results.append(result)
+
             # чекаємо, поки процес завершиться
             pool.close()
             pool.join()
+            # отримуємо результати
+            dicts = [result.get() for result in results if result.get() is not None]
+            # записуємо результати у базу даних
+            print(format_time(t), 'записуємо результати у базу даних')
+            for dct in dicts:
+                for r in dct:
+                    me_db.insert_into_price(name_table, r)
     print(format_time(t), 'Завершено')
 
 
